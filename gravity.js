@@ -20,33 +20,32 @@ let drawLine = function(ctx, pts) {
     ctx.closePath();
 }
 
+let Body = class{
+    /* A body for the gravity sim */
+    constructor(name, m, p, v, a) {
+        this.name = name; // description
+        this.m = m; // mass (kg)
+        this.p = p; // array of x, y of position (m)
+        this.v = v; // array of x, y of velocity (m/s)
+        this.a = a; // array of x, y of applied acceleration (m/s/s)
+    }
+};
+
 let defineBodies = function() {
+
+    let bodies = [
+        new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0]),
+        new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0]),
+        new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0]),
+    ]
+
+    let nBodies = bodies.length  // Number of bodies
+
+    return [bodies, nBodies];
     
-    // x and y coordinates of bodies (m)
-    let xy = [
-        [0, 0],  // sun, defined at origin.
-        [0, 152.10e9],  // Earth
-        [-108.8e9, 0] // Venus
-    ];
-
-    // x and y component of velocities of bodies (m/s)
-    let v = [
-        [0, 0],  // Sun
-        [-29.29e3, 0],  // Earth
-        [0, -35.02e3] // Venus
-    ];
-
-    // masses of bodies in (kg)
-    let m = [
-        1.98847e30,  // Sun
-        5.9722e24,  // Earth
-        4.867e24  // Venus
-    ];
-
-    return [xy, v, m];
 }
 
-let deriv_full = function(dydt, y, t, nBodies, m) {
+let deriv_full = function(dydt, y, t, bodies, nBodies) {
 
     /*
 
@@ -78,28 +77,27 @@ let deriv_full = function(dydt, y, t, nBodies, m) {
             let body_sep = ((y[4*i] - y[4*j])**2 
                            + (y[4*i+1] - y[4*j+1])**2)**0.5;
         
-            dydt[4*i+2] += G * m[j] / body_sep**3 * (y[4*i] - y[4*j]) * -1;
-            dydt[4*i+3] += G * m[j] / body_sep**3 * (y[4*i+1] - y[4*j+1]) * -1;
+            dydt[4*i+2] += G * bodies[j].m / body_sep**3 * (y[4*i] - y[4*j]) * -1;
+            dydt[4*i+3] += G * bodies[j].m / body_sep**3 * (y[4*i+1] - y[4*j+1]) * -1;
 
         }
     }
 }
 
 let main = function() {
-    let xy, v, m;
-    [xy, v, m] = defineBodies();
-    let nBodies = xy.length;  // Number of bodies
+    let bodies, nBodies;
+    [bodies, nBodies] = defineBodies()
     
     let y0 = []; // Initial data
-    for (let i = 0; i < nBodies; i++) {
-        y0.push(xy[i][0]);  // init x
-        y0.push(xy[i][1]);  // init y
-        y0.push(v[i][0]);  // init v in x direction
-        y0.push(v[i][1]);  // init v in y direction
-    }
+    bodies.forEach(function(body){ 
+        y0.push(body.p[0]);  // init x
+        y0.push(body.p[1]);  // init y
+        y0.push(body.v[0]);  // init v in x direction
+        y0.push(body.v[1]);  // init v in y direction
+    });
 
     // redefine function with the inputs it needs... idk terminology.
-    let deriv = function(dydt, y, t) {return deriv_full(dydt, y, t, nBodies, m)};
+    let deriv = function(dydt, y, t) {return deriv_full(dydt, y, t, bodies, nBodies)};
     let integrator = ode45(y0, deriv, 0, 3600);
     
     // Integrate up to tmax: 
