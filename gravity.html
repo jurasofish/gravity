@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>yeet G</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+
+<canvas id="myCanvas" width="480" height="480"></canvas>
+<div id="plot" style="width:600px;height:600;"></div>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
+
+<script src="https://cdn.jsdelivr.net/gh/nicolaspanel/numjs@0.15.1/dist/numjs.min.js"></script>
+<script src="https://wzrd.in/standalone/ode45-cash-karp@latest"></script>
+<script>
+  const ode45 = ode45CashKarp;
+</script>
+<script type="text/javascript" src="gravity.js"></script>
+
+</body>
+</html>
