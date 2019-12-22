@@ -22,7 +22,7 @@ let drawLine = function(ctx, pts) {
 
 let Body = class{
     /* A body for the gravity sim */
-    constructor(name, m, p, v, a, t_hist=[], p_hist=[]) {
+    constructor(name, m, p, v, a, t_hist=[], p_hist=[], t_exp=[], p_exp=[]) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
@@ -35,6 +35,12 @@ let Body = class{
         // intended to be used for plotting.
         this.t_hist = t_hist;  // 1D array of time (s)
         this.p_hist = p_hist;  // 2D array of [x, y] (m)
+        
+        // Store the expected future position over time.
+        // Similar to t_hist and p_hist.
+        this.t_exp = t_exp;  // 1D array of time (s)
+        this.p_exp = p_exp;  // 2D array of [x, y] (m)
+
     }
 };
 
