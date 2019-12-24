@@ -1,6 +1,7 @@
 "use strict";
 
 const G = 6.67408e-11; // gravitational constant
+const TOL = 1e-8;  // Tolerance for ODE solver.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 let HEIGHT = 400;
@@ -22,7 +23,7 @@ let drawLine = function(ctx, pts) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, t_hist=[], p_hist=[], t_exp=[], p_exp=[]) {
+    constructor(name, m, p, v, a, t_hist=nj.array([]), p_hist=[], t_exp=[], p_exp=[]) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
@@ -97,10 +98,8 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
     }
 }
 
-let main = function() {
-    let bodies, nBodies;
-    [bodies, nBodies] = defineBodies()
-    
+let get_y0 = function(bodies) {
+    /* Return the initial vector for the ODE solver. */ 
     let y0 = []; // Initial data
     bodies.forEach(function(body){ 
         y0.push(body.p[0]);  // init x
@@ -108,30 +107,47 @@ let main = function() {
         y0.push(body.v[0]);  // init v in x direction
         y0.push(body.v[1]);  // init v in y direction
     });
+    return y0;
+}
 
-    // redefine function with the inputs it needs... idk terminology.
-    let deriv = function(dydt, y, t) {return deriv_full(dydt, y, t, bodies, nBodies)};
-    let integrator = ode45(y0, deriv, 0, 3600);
+let populate_trajectories = function(bodies, nBodies, tmax, dt) {
+    /* mutate all bodies to update their expected trajectories */
+
+    let y0 = get_y0(bodies); // Initial data
+    let deriv = function(dydt, y, t) {
+        return deriv_full(dydt, y, t, bodies, nBodies)
+    };
+    let integrator = ode45(y0, deriv, 0, dt, {tol: TOL});
     
-    // Integrate up to tmax: 
-    let n = 0, tmax = 3600*24*365.256363004, t = [], y_out = [];
-    while( integrator.step( tmax ) ) {
-        // Store the solution at this timestep: 
-        t.push(integrator.t);
-        y_out.push(integrator.y.slice());
-        n++;
+    // Integrate up to tmax in steps of exactly dt.
+    let y_solved = [], t_solved = [];
+    while(integrator.t < tmax) {
+        integrator.steps(Infinity, integrator.t + dt)
+        t_solved.push(integrator.t);
+        y_solved.push(integrator.y.slice());
     }
-    console.log(n);
-    console.log(t);
-    console.log(y_out);
+
+    // Now update the bodies.
+    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
+        bodies[bodyNum].t_exp.push = t_solved;
+        y_solved.forEach(y_solved_single => {
+            bodies[bodyNum].p_exp.push(
+                [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
+                );
+        });
+    }
+}
+
+let plot_orbits = function(bodies) {
+    /* Plot the expected trajectories of the bodies */
 
     let data = []
-    for (let i = 0; i < nBodies; i++) {
-        let x_pts = [], y_pts = []
-        for (let l = 0; l < t.length; l++) {
-            x_pts.push(y_out[l][4*i+0])
-            y_pts.push(y_out[l][4*i+1])
-        }
+    bodies.forEach(body => {
+        let x_pts = [], y_pts = [];
+        body.p_exp.forEach( p => {
+            x_pts.push(p[0]);
+            y_pts.push(p[1]);
+        })
         var trace = {
             x: x_pts,
             y: y_pts,
@@ -139,14 +155,20 @@ let main = function() {
             type: 'scatter'
         };
         data.push(trace)
-    }
+    });
     var layout = {
         yaxis: {
         scaleanchor: "x",
         },
     }
     Plotly.newPlot('plot', data, layout);
+}
 
+let main = function() {
+    let bodies, nBodies;
+    [bodies, nBodies] = defineBodies()
+    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24*7*4)
+    plot_orbits(bodies)
 }
 
 main()
