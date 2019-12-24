@@ -23,7 +23,9 @@ let drawLine = function(ctx, pts) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, t_hist=nj.array([]), p_hist=[], t_exp=[], p_exp=[]) {
+    constructor(name, m, p, v, a, 
+                t_hist=nj.float64([]), p_hist=nj.float64([]), 
+                t_exp=nj.float64([]), p_exp=nj.float64([])) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
@@ -34,13 +36,13 @@ let Body = class{
         // This is intended to be updated after simulating,
         // although you could give it initial history if you want.
         // intended to be used for plotting.
-        this.t_hist = t_hist;  // 1D array of time (s)
-        this.p_hist = p_hist;  // 2D array of [x, y] (m)
+        this.t_hist = t_hist;  // 1D float64 ndarray of time (s)
+        this.p_hist = p_hist;  // 2D float64 ndarray of [x, y] (m)
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
-        this.t_exp = t_exp;  // 1D array of time (s)
-        this.p_exp = p_exp;  // 2D array of [x, y] (m)
+        this.t_exp = t_exp;  // 1D float64 ndarray of time (s)
+        this.p_exp = p_exp;  // 2D float64 ndarray of [x, y] (m)
 
     }
 };
@@ -127,14 +129,16 @@ let populate_trajectories = function(bodies, nBodies, tmax, dt) {
         y_solved.push(integrator.y.slice());
     }
 
+    t_solved = nj.float64(t_solved)
+    y_solved = nj.float64(y_solved)
+
     // Now update the bodies.
     for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
         bodies[bodyNum].t_exp.push = t_solved;
-        y_solved.forEach(y_solved_single => {
-            bodies[bodyNum].p_exp.push(
-                [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
-                );
-        });
+        bodies[bodyNum].p_exp = nj.stack(
+            [y_solved.pick(null, 4*bodyNum), y_solved.pick(null, 4*bodyNum+1)],
+            -1
+        );
     }
 }
 
@@ -143,14 +147,9 @@ let plot_orbits = function(bodies) {
 
     let data = []
     bodies.forEach(body => {
-        let x_pts = [], y_pts = [];
-        body.p_exp.forEach( p => {
-            x_pts.push(p[0]);
-            y_pts.push(p[1]);
-        })
         var trace = {
-            x: x_pts,
-            y: y_pts,
+            x: body.p_exp.pick(null, 0).tolist(),
+            y: body.p_exp.pick(null, 1).tolist(),
             mode: 'lines+markers',
             type: 'scatter'
         };
