@@ -110,6 +110,17 @@ let get_y0 = function(bodies) {
     return y0;
 }
 
+let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
+    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
+        bodies[bodyNum].t_exp.push = t_solved;
+        y_solved.forEach(y_solved_single => {
+            bodies[bodyNum].p_exp.push(
+                [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
+                );
+        });
+    }
+}
+
 let populate_trajectories = function(bodies, nBodies, tmax, dt) {
     /* mutate all bodies to update their expected trajectories */
 
@@ -128,14 +139,7 @@ let populate_trajectories = function(bodies, nBodies, tmax, dt) {
     }
 
     // Now update the bodies.
-    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-        bodies[bodyNum].t_exp.push = t_solved;
-        y_solved.forEach(y_solved_single => {
-            bodies[bodyNum].p_exp.push(
-                [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
-                );
-        });
-    }
+    update_bodies(bodies, nBodies, t_solved, y_solved)
 }
 
 let plot_orbits = function(bodies) {
@@ -167,8 +171,8 @@ let plot_orbits = function(bodies) {
 let main = function() {
     let bodies, nBodies;
     [bodies, nBodies] = defineBodies()
-    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24*7*4)
-    plot_orbits(bodies)
+    populate_trajectories(bodies, nBodies, 3600*24*350*100, 3600*24*7*4)
+    // plot_orbits(bodies)
 }
 
 main()
