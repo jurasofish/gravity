@@ -172,7 +172,7 @@ let main = function() {
     let bodies, nBodies;
     [bodies, nBodies] = defineBodies()
     populate_trajectories(bodies, nBodies, 3600*24*350*100, 3600*24*7*4)
-    // plot_orbits(bodies)
+    plot_orbits(bodies)
 }
 
 main()
