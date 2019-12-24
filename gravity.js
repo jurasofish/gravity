@@ -112,6 +112,26 @@ let get_y0 = function(bodies) {
     return y0;
 }
 
+let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
+    t_solved = nj.array(t_solved)
+    y_solved = nj.array(y_solved)
+
+    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
+        bodies[bodyNum].t_exp  = t_solved;
+        bodies[bodyNum].p_exp = nj.stack(
+            [y_solved.pick(null, 4*bodyNum), y_solved.pick(null, 4*bodyNum+1)],
+            -1
+        );
+        /*
+        bodies[bodyNum].p_exp = nj.concatenate(
+            y_solved.slice(null, [4*bodyNum, 4*bodyNum+1]), 
+            y_solved.slice(null, [4*bodyNum+1, 4*bodyNum+2])
+        );
+        */
+    }
+
+}
+
 let populate_trajectories = function(bodies, nBodies, tmax, dt) {
     /* mutate all bodies to update their expected trajectories */
 
@@ -129,17 +149,9 @@ let populate_trajectories = function(bodies, nBodies, tmax, dt) {
         y_solved.push(integrator.y.slice());
     }
 
-    t_solved = nj.float64(t_solved)
-    y_solved = nj.float64(y_solved)
-
     // Now update the bodies.
-    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-        bodies[bodyNum].t_exp.push = t_solved;
-        bodies[bodyNum].p_exp = nj.stack(
-            [y_solved.pick(null, 4*bodyNum), y_solved.pick(null, 4*bodyNum+1)],
-            -1
-        );
-    }
+    update_bodies(bodies, nBodies, t_solved, y_solved)
+
 }
 
 let plot_orbits = function(bodies) {
@@ -166,8 +178,8 @@ let plot_orbits = function(bodies) {
 let main = function() {
     let bodies, nBodies;
     [bodies, nBodies] = defineBodies()
-    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24*7*4)
-    plot_orbits(bodies)
+    populate_trajectories(bodies, nBodies, 3600*24*350*100, 3600*24*7*4)
+    //plot_orbits(bodies)
 }
 
 main()
