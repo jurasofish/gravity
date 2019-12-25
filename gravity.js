@@ -28,12 +28,13 @@ let col_2d = function(x, n) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, t_hist=[], p_hist=[], t_exp=[], p_exp=[]) {
+    constructor(name, m, p, v, a, t=0, t_hist=[], p_hist=[], v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
         this.v = v; // array of x, y of velocity (m/s)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
+        this.t = t; // Time at which the body is at point p.
         
         // store the history of body position over time.
         // This is intended to be updated after simulating,
@@ -41,11 +42,13 @@ let Body = class{
         // intended to be used for plotting.
         this.t_hist = t_hist;  // 1D array of time (s)
         this.p_hist = p_hist;  // 2D array of [x, y] (m)
+        this.v_hist = v_hist;  // 2D array of [x, y] (m/s)
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
         this.t_exp = t_exp;  // 1D array of time (s)
         this.p_exp = p_exp;  // 2D array of [x, y] (m)
+        this.v_exp = v_exp;  // 2D array of [x, y] (m/s)
 
     }
 };
@@ -120,6 +123,7 @@ let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
         let body = bodies[bodyNum]
         body.t_exp = t_solved.map(x => x + body.t);
         body.p_exp = y_solved.map(x => [x[4*bodyNum], x[4*bodyNum+1]]);
+        body.v_exp = y_solved.map(x => [x[4*bodyNum+2], x[4*bodyNum+3]]);
     }
 }
 
