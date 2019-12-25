@@ -112,7 +112,7 @@ let get_y0 = function(bodies) {
 
 let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
     for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-        bodies[bodyNum].t_exp.push = t_solved;
+        bodies[bodyNum].t_exp = t_solved;
         y_solved.forEach(y_solved_single => {
             bodies[bodyNum].p_exp.push(
                 [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
