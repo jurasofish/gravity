@@ -23,11 +23,7 @@ let drawLine = function(ctx, pts) {
 
 let col_2d = function(x, n) {
     /* given a 2D array x, return column n as a 1D array */
-    let y = [];
-    x.forEach( row => {
-        y.push(row[n]);
-    })
-    return y;
+    return x.map(row => row[n]);
 }
 
 let Body = class{
@@ -121,12 +117,9 @@ let get_y0 = function(bodies) {
 
 let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
     for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-        bodies[bodyNum].t_exp = t_solved;
-        y_solved.forEach(y_solved_single => {
-            bodies[bodyNum].p_exp.push(
-                [y_solved_single[4*bodyNum], y_solved_single[4*bodyNum+1]]
-                );
-        });
+        let body = bodies[bodyNum]
+        body.t_exp = t_solved.map(x => x + body.t);
+        body.p_exp = y_solved.map(x => [x[4*bodyNum], x[4*bodyNum+1]]);
     }
 }
 
