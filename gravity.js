@@ -51,6 +51,20 @@ let Body = class{
         this.v_exp = v_exp;  // 2D array of [x, y] (m/s)
 
     }
+
+    tick() {
+        /* tick one step forward in time: set the current state of 
+        the body to the first element of the expected trajectory,
+        and push the current state onto the history. 
+        */
+        this.t_hist.push(this.t)
+        this.p_hist.push(this.p)
+        this.v_hist.push(this.v)
+
+        this.t = this.t_exp.shift()
+        this.p = this.p_exp.shift()
+        this.v = this.v_exp.shift()
+    }
 };
 
 let defineBodies = function() {
@@ -169,11 +183,17 @@ let plot_orbits = function(bodies) {
     Plotly.newPlot('plot', data, layout);
 }
 
+let tick_plot = function(bodies, nBodies) {
+    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24*7)
+    plot_orbits(bodies)
+    bodies.forEach(body => body.tick())
+}
+
 let main = function() {
     let bodies, nBodies;
     [bodies, nBodies] = defineBodies()
-    populate_trajectories(bodies, nBodies, 3600*24*350*100, 3600*24*7*4)
-    plot_orbits(bodies)
+    setInterval(tick_plot, 10, bodies, nBodies)
+
 }
 
 main()
