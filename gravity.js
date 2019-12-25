@@ -21,6 +21,15 @@ let drawLine = function(ctx, pts) {
     ctx.closePath();
 }
 
+let col_2d = function(x, n) {
+    /* given a 2D array x, return column n as a 1D array */
+    let y = [];
+    x.forEach( row => {
+        y.push(row[n]);
+    })
+    return y;
+}
+
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
     constructor(name, m, p, v, a, t_hist=[], p_hist=[], t_exp=[], p_exp=[]) {
@@ -147,14 +156,9 @@ let plot_orbits = function(bodies) {
 
     let data = []
     bodies.forEach(body => {
-        let x_pts = [], y_pts = [];
-        body.p_exp.forEach( p => {
-            x_pts.push(p[0]);
-            y_pts.push(p[1]);
-        })
         var trace = {
-            x: x_pts,
-            y: y_pts,
+            x: col_2d(body.p_exp, 0),
+            y: col_2d(body.p_exp, 1),
             mode: 'lines+markers',
             type: 'scatter'
         };
