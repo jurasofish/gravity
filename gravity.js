@@ -116,9 +116,7 @@ let defineBodies = function() {
 }
 
 let deriv_full = function(dydt, y, t, bodies, nBodies) {
-
     /*
-
     q is body position
 
     qi'' = G*mj / ||qi-qj||**3 * (qi-qj)
@@ -128,28 +126,21 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
 
     x1' = x2 = q'
     x2' = q'' = G*mj / ||qi-qj||**3 * (qi-qj)
-
     */
-    
-    for (let i = 0; i < nBodies; i++) {
 
+    let common;
+    for (let i = 0; i < nBodies; i++) {
         // x1' = x2 = q'
         dydt[4*i] = y[4*i+2];  // v in x directino
         dydt[4*i+1] = y[4*i+3];  // v in y direction
-        
         dydt[4*i+2] = 0;  // a in x direction
         dydt[4*i+3] = 0;  // a in y direction
-
         for (let j = 0; j < nBodies; j++) {
             if (i == j) { continue; }
-            // console.log(i, j)
-
-            let body_sep = ((y[4*i] - y[4*j])**2 
-                           + (y[4*i+1] - y[4*j+1])**2)**0.5;
-        
-            dydt[4*i+2] += G * bodies[j].m / body_sep**3 * (y[4*i] - y[4*j]) * -1;
-            dydt[4*i+3] += G * bodies[j].m / body_sep**3 * (y[4*i+1] - y[4*j+1]) * -1;
-
+            common = (G * bodies[j].m
+                      / ((y[4*i] - y[4*j])**2 + (y[4*i+1] - y[4*j+1])**2)**1.5)
+            dydt[4*i+2] += common * (y[4*i] - y[4*j]) * -1;
+            dydt[4*i+3] += common * (y[4*i+1] - y[4*j+1]) * -1;
         }
     }
 }
