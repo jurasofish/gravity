@@ -26,6 +26,25 @@ let col_2d = function(x, n) {
     return x.map(row => row[n]);
 }
 
+let max_1d = function(x) {
+    /* given a 1D array x return the maximum value */
+    return x.reduce((a, b) => Math.max(a, b));
+}
+
+let min_1d = function(x) {
+    /* given a 1D array x return the minimum value */
+    return x.reduce((a, b) => Math.min(a, b));
+}
+
+let draw_limit = function(bodies) {
+    /* given the bodies, determine the min/max x/y to draw everything. */
+    let p = [];
+    bodies.map(body => p = p.concat([body.p], body.p_exp));
+    let x = col_2d(p, 0);
+    let y = col_2d(p, 1);
+    return [min_1d(x), max_1d(x), min_1d(y), max_1d(y)]
+}
+
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
     constructor(name, m, p, v, a, t=0, t_hist=[], p_hist=[], v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
@@ -181,6 +200,22 @@ let plot_orbits = function(bodies) {
         },
     }
     Plotly.newPlot('plot', data, layout);
+
+    let minx, maxx, miny, maxy;
+    [minx, maxx, miny, maxy] = draw_limit(bodies)
+  
+    ctx.resetTransform()
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
+    let scale = Math.min(xScale, yScale); // Same x and y scale
+    ctx.transform(1, 0, 0, -1, 0, canvas.height); // Convert to cartesian
+    ctx.transform(scale, 0, 0, scale, 0, 0); // scale
+    ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
+    ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
+
+    bodies.forEach(body => {
+        drawLine(ctx, body.p_exp)
+    });
 }
 
 let tick_plot = function(bodies, nBodies) {
@@ -198,13 +233,6 @@ let main = function() {
 
 main()
 
-let xy_pts_test = [
-    [100, 100],
-    [150, 150],
-    [200, 300],
-    [400, 230]
-];
-drawLine(ctx, xy_pts_test)
 
 
 
