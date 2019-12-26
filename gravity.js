@@ -47,12 +47,14 @@ let draw_limit = function(bodies) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, t=0, t_hist=[], p_hist=[], v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
+    constructor(name, m, p, v, a, r, t=0, t_hist=[], p_hist=[], v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
         this.v = v; // array of x, y of velocity (m/s)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
+        this.r = r; // Body radius, for for collissions (m)
+        this.r_g = Math.log(r) * 5e8; // Body radius, for graphics.
         this.t = t; // Time at which the body is at point p.
         
         // store the history of body position over time.
@@ -89,9 +91,9 @@ let Body = class{
 let defineBodies = function() {
 
     let bodies = [
-        new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0]),
-        new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0]),
-        new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0]),
+        new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
+        new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
+        new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
     ]
 
     let nBodies = bodies.length  // Number of bodies
@@ -199,7 +201,7 @@ let plot_orbits = function(bodies) {
         scaleanchor: "x",
         },
     }
-    Plotly.newPlot('plot', data, layout);
+    // Plotly.newPlot('plot', data, layout);
 
     let minx, maxx, miny, maxy;
     [minx, maxx, miny, maxy] = draw_limit(bodies)
@@ -214,7 +216,12 @@ let plot_orbits = function(bodies) {
     ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
 
     bodies.forEach(body => {
-        drawLine(ctx, body.p_exp)
+        drawLine(ctx, body.p_exp);
+        ctx.beginPath();
+        ctx.arc(body.p[0], body.p[1], body.r_g, 0, Math.PI*2);
+        ctx.fillStyle = "green";
+        ctx.fill();
+        ctx.closePath();
     });
 }
 
