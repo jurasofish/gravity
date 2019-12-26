@@ -95,9 +95,12 @@ let Body = class{
 let defineBodies = function() {
 
     let bodies = [
+        new Body('User', 100e2, [-100e9, -100e9], [1, 3.5e4], [0, 0], 100),
         new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
         new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
         new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
+        new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e2], [0, 0], 100),
+        // new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
     ]
 
     let nBodies = bodies.length  // Number of bodies
@@ -164,6 +167,15 @@ let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
         body.p_exp = y_solved.map(x => [x[4*bodyNum], x[4*bodyNum+1]]);
         body.v_exp = y_solved.map(x => [x[4*bodyNum+2], x[4*bodyNum+3]]);
     }
+    /*
+    for (let i = 0; i < nBodies; i++) {
+        for (let j = 0; j < nBodies; j++) {
+            let body_sep = ((bodies[i].p[0] - bodies[j].p[0])**2 
+                           + (bodies[i].p[1] - bodies[j].p[1])**2)**0.5;
+            console.log(bodies[i].name + ' ' + bodies[j].name + ' ' + body_sep)
+        }
+    }
+    */
 }
 
 let populate_trajectories = function(bodies, nBodies, tmax, dt) {
@@ -230,7 +242,7 @@ let plot_orbits = function(bodies) {
 }
 
 let tick_plot = function(bodies, nBodies) {
-    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24*7)
+    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24)
     plot_orbits(bodies)
     bodies.forEach(body => body.tick())
 }
