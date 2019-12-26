@@ -77,18 +77,24 @@ let Body = class{
 
     }
 
-    tick() {
+    tick(dt) {
         /* tick one step forward in time: set the current state of 
         the body to the first element of the expected trajectory,
         and push the current state onto the history. 
         */
-        this.t_hist.push(this.t)
-        this.p_hist.push(this.p)
-        this.v_hist.push(this.v)
 
-        this.t = this.t_exp.shift()
-        this.p = this.p_exp.shift()
-        this.v = this.v_exp.shift()
+        let finalTime = this.t + dt;
+
+        while (this.t < finalTime) {
+
+            this.t_hist.push(this.t)
+            this.p_hist.push(this.p)
+            this.v_hist.push(this.v)
+
+            this.t = this.t_exp.shift()
+            this.p = this.p_exp.shift()
+            this.v = this.v_exp.shift()
+        }
     }
 };
 
@@ -160,43 +166,32 @@ let get_y0 = function(bodies) {
     return y0;
 }
 
-let update_bodies = function(bodies, nBodies, t_solved, y_solved) {
-    for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-        let body = bodies[bodyNum]
-        body.t_exp = t_solved.map(x => x + body.t);
-        body.p_exp = y_solved.map(x => [x[4*bodyNum], x[4*bodyNum+1]]);
-        body.v_exp = y_solved.map(x => [x[4*bodyNum+2], x[4*bodyNum+3]]);
-    }
-    /*
-    for (let i = 0; i < nBodies; i++) {
-        for (let j = 0; j < nBodies; j++) {
-            let body_sep = ((bodies[i].p[0] - bodies[j].p[0])**2 
-                           + (bodies[i].p[1] - bodies[j].p[1])**2)**0.5;
-            console.log(bodies[i].name + ' ' + bodies[j].name + ' ' + body_sep)
-        }
-    }
-    */
-}
-
 let populate_trajectories = function(bodies, nBodies, tmax, dt) {
     /* mutate all bodies to update their expected trajectories */
 
     let y0 = get_y0(bodies); // Initial data
-    let deriv = function(dydt, y, t) {
-        return deriv_full(dydt, y, t, bodies, nBodies)
-    };
-    let integrator = ode45(y0, deriv, 0, dt, {tol: TOL});
+    let deriv = (dydt, y, t) => deriv_full(dydt, y, t, bodies, nBodies);
+    let integrator = ode45(y0, deriv, 0, dt, {tol: TOL, dtMaxMag: dt});
     
-    // Integrate up to tmax in steps of exactly dt.
-    let y_solved = [], t_solved = [];
-    while(integrator.t < tmax) {
-        integrator.steps(Infinity, integrator.t + dt)
-        t_solved.push(integrator.t);
-        y_solved.push(integrator.y.slice());
-    }
+    // Empty the arrays, ready for new data to be pusehd into them.
+    bodies.forEach(body => {body.t_exp = []; body.p_exp = [], body.v_exp=[];})
 
-    // Now update the bodies.
-    update_bodies(bodies, nBodies, t_solved, y_solved)
+    // Store future trajectories with a time resolution of at least
+    // dt, or higher if the ODE solver uses a higher resolution.
+    let moreStepsRequired, tEndSub;
+    while(integrator.t < tmax) {
+        tEndSub = integrator.t  + dt;
+        while(true) {
+            moreStepsRequired = integrator.step(tEndSub);
+            for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
+                let body = bodies[bodyNum]
+                body.t_exp.push(integrator.t + body.t);
+                body.p_exp.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
+                body.v_exp.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
+            }
+            if (!moreStepsRequired) {break;}
+        }
+    }
 }
 
 let plot_orbits = function(bodies) {
@@ -242,9 +237,10 @@ let plot_orbits = function(bodies) {
 }
 
 let tick_plot = function(bodies, nBodies) {
-    populate_trajectories(bodies, nBodies, 3600*24*350, 3600*24)
+    let dt = 3600*24;
+    populate_trajectories(bodies, nBodies, 3600*24*350, dt)
     plot_orbits(bodies)
-    bodies.forEach(body => body.tick())
+    bodies.forEach(body => body.tick(dt))
 }
 
 let main = function() {
