@@ -39,7 +39,10 @@ let min_1d = function(x) {
 let draw_limit = function(bodies) {
     /* given the bodies, determine the min/max x/y to draw everything. */
     let p = [];
-    bodies.map(body => p = p.concat([body.p], body.p_exp));
+    bodies.forEach( body => {
+        p = p.concat([body.p], body.p_exp);
+    })
+    //bodies.map(body => p = p.concat([body.p], body.p_exp));
     let x = col_2d(p, 0);
     let y = col_2d(p, 1);
     return [min_1d(x), max_1d(x), min_1d(y), max_1d(y)]
