@@ -47,7 +47,8 @@ let draw_limit = function(bodies) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, r, t=0, t_hist=[], p_hist=[], v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
+    constructor(name, m, p, v, a, r, t=0, t_hist=[], p_hist=[], 
+                v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.p = p; // array of x, y of position (m)
