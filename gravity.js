@@ -363,7 +363,6 @@ let tick_plot = function(system) {
 let main = function() {
     let system = defineSystem();
     setInterval(tick_plot, 10, system)
-
 }
 
 let transformCoords = function(p) {
