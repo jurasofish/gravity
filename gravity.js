@@ -15,6 +15,9 @@ let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEUP = [0, 0];  // Position where mouse click was released.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 
+let GO = false;  // If true, tick system after every frame.
+// GO = true;  // debug
+
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
     pts.forEach(point => {
@@ -144,13 +147,16 @@ let defineSystem = function() {
 
     pBodies[0] ALWAYS contains bodies at the time corresponding to system.t
     That means bodies are shift()ed off the pBodies array when they are used up.
+
+    In any array of bodies, the first body is ALWAYS the user controlled body.
+    This will probs change later...
     */
     let system = {
         // t: 0,
         // tol: 1e-8,
         // g: 6.67408e-11,
         pBodies: [[
-            new Body('User', 100e2, [-100e9, -100e9], [1, 3.5e4], [0, 0], 100),
+            new Body('User', 100e2, [-100e9, -100e9], [1, 3.5e2], [0, 0], 100),
             new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
             new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
             new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
@@ -271,6 +277,18 @@ let collide = function(system) {
     return false; // There was no collision - return false.
 }
 
+let updateUser = function(system) {
+    if (MOUSECLICKED && !GO) {
+        let user = system.pBodies[0][0];
+        user.p[0] = MOUSEDOWN;
+        let k = 5e6;
+        user.v[0] = [
+            (MOUSEDOWN[0] - MOUSEPOS[0])/k,
+            (MOUSEDOWN[1] - MOUSEPOS[1])/k,
+        ]
+    }
+}
+
 let populate_trajectories = function(system, tIncrease, dt) {
     /* mutate all bodies to update their expected trajectories 
     tIncrease is how many more seconds into the future to simulate.
@@ -285,6 +303,8 @@ let populate_trajectories = function(system, tIncrease, dt) {
         body.p = [body.p[0]];
         body.v = [body.v[0]];
     });
+
+    updateUser(system);  // Update user ship based on current input state.
 
     let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
     let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
@@ -340,7 +360,6 @@ let plot = function(system) {
 
     system.pBodies.forEach( (bodies, bodiesIdx) => {
         bodies.forEach(body => {
-            drawLine(ctx, body.p);  // Draw paths for all sets of bodies.
             if (bodiesIdx == 0) {  // Only draw bodies for the first set of bodies.
                 ctx.beginPath();
                 ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
@@ -348,6 +367,7 @@ let plot = function(system) {
                 ctx.fill();
                 ctx.closePath();
             }
+            drawLine(ctx, body.p);  // Draw paths for all sets of bodies.
         });
     });
 
@@ -358,10 +378,16 @@ let plot = function(system) {
 }
 
 let tick_plot = function(system) {
-    let dt = 3600*24;
+    let dt = 3600*24/2;
+
+    // Based on current mouse click and drag status,
+    // modify the bodies to include the user body.
+
     populate_trajectories(system, 3600*24*350, dt)
     plot(system)
-    system.tick(dt);
+    if (GO) {
+        system.tick(dt);
+    }
 }
 
 let main = function() {
@@ -391,6 +417,9 @@ canvas.addEventListener('mouseup', e => {
     let y = e.clientY - canvas.offsetTop;
     [x, y] = transformCoords([x, y]);
     MOUSEUP = [x, y];
+    if (MOUSECLICKED) {
+        GO = true;
+    }
     MOUSECLICKED = false;
 });
 
