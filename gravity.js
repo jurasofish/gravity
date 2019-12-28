@@ -12,8 +12,8 @@ canvas.width = WIDTH;
 // All coordinates are physical.
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
-let MOUSEUP = [1, 1];  // Position where mouse click was released.
-let MOUSEPOS = [2, 2];  // Position of mouse hovering.
+let MOUSEUP = [0, 0];  // Position where mouse click was released.
+let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 
 
 let drawLine = function(ctx, pts) {
