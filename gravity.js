@@ -36,7 +36,7 @@ let min_1d = function(x) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, r) {
+    constructor(name, m, p, v, a, r, t=0) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
@@ -45,7 +45,7 @@ let Body = class{
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
-        this.t = [0];  // 1D array of time (s)
+        this.t = [t];  // 1D array of time (s)
         this.p = [p];  // 2D array of [x, y] (m)
         this.v = [v];  // 2D array of [x, y] (m/s)
         
