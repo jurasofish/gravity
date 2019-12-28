@@ -72,25 +72,23 @@ let Body = class{
     }
 
     tick(dt) {
-        /* tick one step forward in time: set the current state of 
+        /* tick forward dt seconds time: set the current state of 
         the body to the first element of the expected trajectory,
         and push the current state onto the history. 
 
-        Return true if more ticks can be performed, otherwise
-        return false.
+        Return true if successful, otherwise return false.
+        false probably indicates that you should move to the next array
+        of bodies in the piecewise array.
         */
-
         if (this.t.length == 0) {return false;}
-
         let finalTime = this.t[0] + dt;
-
         while (this.t[0] < finalTime) {
-
             this.t_hist.push(this.t.shift())
             this.p_hist.push(this.p.shift())
             this.v_hist.push(this.v.shift())
+            if (this.t.length == 0) {return false;}
         }
-        return this.t.lenth > 0;
+        return this.t.length > 0;
     }
 };
 
