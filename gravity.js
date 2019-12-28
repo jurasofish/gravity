@@ -333,14 +333,16 @@ let plot_orbits = function(system) {
     ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
     ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
 
-    system.pBodies.forEach( bodies => {
+    system.pBodies.forEach( (bodies, bodiesIdx) => {
         bodies.forEach(body => {
-            drawLine(ctx, body.p);
-            ctx.beginPath();
-            ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
-            ctx.fillStyle = "green";
-            ctx.fill();
-            ctx.closePath();
+            drawLine(ctx, body.p);  // Draw paths for all sets of bodies.
+            if (bodiesIdx == 0) {  // Only draw bodies for the first set of bodies.
+                ctx.beginPath();
+                ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
+                ctx.fillStyle = "green";
+                ctx.fill();
+                ctx.closePath();
+            }
         });
     })
 }
