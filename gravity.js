@@ -76,6 +76,38 @@ let Body = class{
         return clone;
     }
 
+    combine(b2) {
+        /* return a body which results from the perfectly inelastic collision with body b2 */
+        let b1 = this;
+        let b1_p = b1.p.slice(-1)[0], b2_p = b2.p.slice(-1)[0];  // body current points.
+        let b1_v = b1.v.slice(-1)[0], b2_v = b2.v.slice(-1)[0];  // body current velocities.
+        let c_m = b1.m + b2.m;  // Mass of combined bodies.
+
+        // Centroid of the two bodies.
+        let c_p = [
+            (b1.m * b1_p[0] + b2.m * b2_p[0])/c_m,
+            (b1.m * b1_p[1] + b2.m * b2_p[1])/c_m
+        ];
+
+        // Conservation of momentum gives final velocity.
+        // Assume perfectly inelastic collision.
+        let c_v = [
+            (b1.m * b1_v[0] + b2.m * b2_v[0])/c_m,
+            (b1.m * b1_v[1] + b2.m * b2_v[1])/c_m,
+        ];
+
+        let c = new Body(b1.name + ' + ' + b2.name,
+                     c_m,
+                     c_p,
+                     c_v,
+                     [0, 0],
+                     b1.r + b2.r,  // todo: combine volumes and work out resulting radius assumming constant density
+                     b1.t.slice(-1)[0]
+        );
+
+        return c;
+    }
+
     tick(dt) {
         /* tick forward dt seconds time: set the current state of 
         the body to the first element of the expected trajectory,
@@ -220,17 +252,12 @@ let collide = function(system) {
 
                 // Clone the bodies which aren't involved in the collision.
                 bodies.forEach((body, cloneBodyNum) => {
-                    
-                    bodiesNew.push(body.fork());  // debug: clone all.
-                    /*
+                    // bodiesNew.push(body.fork());  // debug: clone all.
                     if (cloneBodyNum != i && cloneBodyNum != j) {
-                        bodiesNew.push(body.cloneCollision());  // debug: clone all.
-                        body.p.shift();
-                        body.v.shift();
-                        body.t.shift();
+                        bodiesNew.push(body.fork());  // debug: clone all.
                     }
-                    */
                 });
+                bodiesNew.push(bodyi.combine(bodyj));
                 system.pBodies.push(bodiesNew)
                 return true; // There was a collision - return true.
             }
