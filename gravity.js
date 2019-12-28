@@ -34,18 +34,6 @@ let min_1d = function(x) {
     return x.reduce((a, b) => Math.min(a, b));
 }
 
-let draw_limit = function(bodies) {
-    /* given the bodies, determine the min/max x/y to draw everything. */
-    let p = [];
-    bodies.forEach( body => {
-        p = p.concat(body.p);
-    })
-    //bodies.map(body => p = p.concat([body.p], body.p));
-    let x = col_2d(p, 0);
-    let y = col_2d(p, 1);
-    return [min_1d(x), max_1d(x), min_1d(y), max_1d(y)]
-}
-
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
     constructor(name, m, p, v, a, r) {
@@ -124,6 +112,19 @@ let defineSystem = function() {
                 else {break;}
             }
         },
+
+        draw_limit: function() {
+            /* given the system, determine the min/max x/y to draw everything. */
+            let p = [];
+            this.pBodies.forEach( bodies => {
+                bodies.forEach( body => {
+                    p = p.concat(body.p);
+                })
+            })
+            let x = col_2d(p, 0);
+            let y = col_2d(p, 1);
+            return [min_1d(x), max_1d(x), min_1d(y), max_1d(y)]
+        }
     }
     return system;
 }
@@ -275,27 +276,10 @@ let populate_trajectories = function(system, tIncrease, dt) {
 let plot_orbits = function(system) {
     /* Plot the expected trajectories of the bodies */
 
-    let bodies = system.pBodies[0];
-    let data = []
-    bodies.forEach(body => {
-        var trace = {
-            x: col_2d(body.p, 0),
-            y: col_2d(body.p, 1),
-            mode: 'lines+markers',
-            type: 'scatter'
-        };
-        data.push(trace)
-    });
-    var layout = {
-        yaxis: {
-        scaleanchor: "x",
-        },
-    }
-    // Plotly.newPlot('plot', data, layout);
-
     let minx, maxx, miny, maxy;
-    [minx, maxx, miny, maxy] = draw_limit(bodies)
-  
+    [minx, maxx, miny, maxy] = system.draw_limit()
+    
+    // Apply transformations to make plotting possible in real cartesian coordinates.
     ctx.resetTransform()
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
@@ -305,14 +289,16 @@ let plot_orbits = function(system) {
     ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
     ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
 
-    bodies.forEach(body => {
-        drawLine(ctx, body.p);
-        ctx.beginPath();
-        ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
-        ctx.fillStyle = "green";
-        ctx.fill();
-        ctx.closePath();
-    });
+    system.pBodies.forEach( bodies => {
+        bodies.forEach(body => {
+            drawLine(ctx, body.p);
+            ctx.beginPath();
+            ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
+            ctx.fillStyle = "green";
+            ctx.fill();
+            ctx.closePath();
+        });
+    })
 }
 
 let tick_plot = function(system) {
