@@ -4,17 +4,16 @@ const G = 6.67408e-11; // gravitational constant
 const TOL = 1e-8;  // Tolerance for ODE solver.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
-let HEIGHT = 400;
-let WIDTH = 600;
-canvas.height = HEIGHT;
-canvas.width = WIDTH;
+
+let windowSize = () => [window.innerHeight, window.innerWidth];
+[canvas.height, canvas.width] = windowSize();
+window.addEventListener('resize', () => [canvas.height, canvas.width] = windowSize());
 
 // All coordinates are physical.
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEUP = [0, 0];  // Position where mouse click was released.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
-
 
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
