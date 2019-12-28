@@ -55,6 +55,12 @@ let Body = class{
         this.r = r; // Body radius, for for collissions (m)
         this.r_g = Math.log(r) * 5e8; // Body radius, for graphics.
         
+        // Store the expected future position over time.
+        // Similar to t_hist and p_hist.
+        this.t = [0];  // 1D array of time (s)
+        this.p = [p];  // 2D array of [x, y] (m)
+        this.v = [v];  // 2D array of [x, y] (m/s)
+        
         // store the history of body position over time.
         // This is intended to be updated after simulating,
         // although you could give it initial history if you want.
@@ -62,12 +68,6 @@ let Body = class{
         this.t_hist = [];  // 1D array of time (s)
         this.p_hist = [];  // 2D array of [x, y] (m)
         this.v_hist = [];  // 2D array of [x, y] (m/s)
-        
-        // Store the expected future position over time.
-        // Similar to t_hist and p_hist.
-        this.t = [0];  // 1D array of time (s)
-        this.p = [p];  // 2D array of [x, y] (m)
-        this.v = [v];  // 2D array of [x, y] (m/s)
 
     }
 
