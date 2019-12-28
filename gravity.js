@@ -76,19 +76,19 @@ let Body = class{
         the body to the first element of the expected trajectory,
         and push the current state onto the history. 
 
-        Return true if successful, otherwise return false.
-        false probably indicates that you should move to the next array
+        Return true if not able to reach dt, otherwise return false.
+        true probably indicates that you should move to the next array
         of bodies in the piecewise array.
         */
-        if (this.t.length == 0) {return false;}
+        if (this.t.length == 0) {return true;}
         let finalTime = this.t[0] + dt;
         while (this.t[0] < finalTime) {
             this.t_hist.push(this.t.shift())
             this.p_hist.push(this.p.shift())
             this.v_hist.push(this.v.shift())
-            if (this.t.length == 0) {return false;}
+            if (this.t.length == 0) {return true;}
         }
-        return this.t.length > 0;
+        return false;
     }
 };
 
@@ -96,9 +96,9 @@ let defineSystem = function() {
     /* system is an object representing the current system state.
     The main feature is the pBodies array, which is a piecewise definition
     of the bodies in the system over time.
-
     The bodies are defined piecewise to allow bodies to be created/destroyed
     when a collision event occurs.
+    The arrays of bodies are ordered in the pBodies array increasing in time.
 
     pBodies[0] ALWAYS contains bodies at the time corresponding to system.t
     That means bodies are shift()ed off the pBodies array when they are used up.
@@ -118,13 +118,14 @@ let defineSystem = function() {
 
         tick: function(dt) {
             /* Move system dt seconds forward in time using the expected values. */
-            let bodies = system.pBodies[0];
-            bodies.forEach(body => body.tick(dt))
+            while (True) {
+                let results = new Set([this.pBodies[0].map(body => body.tick(dt))]);
+                if (results.has(true)) {this.pBodies.shift();}
+                else {break;}
+            }
         },
     }
-
     return system;
-    
 }
 
 let deriv_full = function(dydt, y, t, bodies) {
