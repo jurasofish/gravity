@@ -38,9 +38,9 @@ let draw_limit = function(bodies) {
     /* given the bodies, determine the min/max x/y to draw everything. */
     let p = [];
     bodies.forEach( body => {
-        p = p.concat(body.p_exp);
+        p = p.concat(body.p);
     })
-    //bodies.map(body => p = p.concat([body.p], body.p_exp));
+    //bodies.map(body => p = p.concat([body.p], body.p));
     let x = col_2d(p, 0);
     let y = col_2d(p, 1);
     return [min_1d(x), max_1d(x), min_1d(y), max_1d(y)]
@@ -65,9 +65,9 @@ let Body = class{
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
-        this.t_exp = [0];  // 1D array of time (s)
-        this.p_exp = [p];  // 2D array of [x, y] (m)
-        this.v_exp = [v];  // 2D array of [x, y] (m/s)
+        this.t = [0];  // 1D array of time (s)
+        this.p = [p];  // 2D array of [x, y] (m)
+        this.v = [v];  // 2D array of [x, y] (m/s)
 
     }
 
@@ -80,17 +80,17 @@ let Body = class{
         return false.
         */
 
-        if (this.t_exp.length == 0) {return false;}
+        if (this.t.length == 0) {return false;}
 
-        let finalTime = this.t_exp[0] + dt;
+        let finalTime = this.t[0] + dt;
 
-        while (this.t_exp[0] < finalTime) {
+        while (this.t[0] < finalTime) {
 
-            this.t_hist.push(this.t_exp.shift())
-            this.p_hist.push(this.p_exp.shift())
-            this.v_hist.push(this.v_exp.shift())
+            this.t_hist.push(this.t.shift())
+            this.p_hist.push(this.p.shift())
+            this.v_hist.push(this.v.shift())
         }
-        return this.t_exp.lenth > 0;
+        return this.t.lenth > 0;
     }
 };
 
@@ -163,10 +163,10 @@ let get_y0 = function(bodies) {
     /* Return the initial vector for the ODE solver. */ 
     let y0 = [];
     bodies.forEach(function(body){ 
-        y0.push(body.p_exp.slice(-1)[0][0]);  // init x
-        y0.push(body.p_exp.slice(-1)[0][1]);  // init y
-        y0.push(body.v_exp.slice(-1)[0][0]);  // init v in x direction
-        y0.push(body.v_exp.slice(-1)[0][1]);  // init v in y direction
+        y0.push(body.p.slice(-1)[0][0]);  // init x
+        y0.push(body.p.slice(-1)[0][1]);  // init y
+        y0.push(body.v.slice(-1)[0][0]);  // init v in x direction
+        y0.push(body.v.slice(-1)[0][1]);  // init v in y direction
     });
     return y0;
 }
@@ -184,15 +184,15 @@ let collide = function(system) {
     let bodyi, bodyj, i_x, i_y, i_r, j_x, j_y, j_r, body_sep;
     for (let i = 0; i < bodies.length; i++) {
         bodyi = bodies[i];
-        i_x = bodyi.p_exp.slice(-1)[0][0];
-        i_y = bodyi.p_exp.slice(-1)[0][1];
+        i_x = bodyi.p.slice(-1)[0][0];
+        i_y = bodyi.p.slice(-1)[0][1];
         i_r = bodyi.r;
 
         for (let j = i+1; j < bodies.length; j++) {
 
             bodyj = bodies[j];
-            j_x = bodyj.p_exp.slice(-1)[0][0];
-            j_y = bodyj.p_exp.slice(-1)[0][1];
+            j_x = bodyj.p.slice(-1)[0][0];
+            j_y = bodyj.p.slice(-1)[0][1];
             j_r = bodyj.r;
             body_sep = ((i_x - j_x)**2  + (i_y - j_y)**2)**0.5;
             if (body_sep <= j_r + i_r) {
@@ -202,18 +202,18 @@ let collide = function(system) {
                 
                 // debug: reset state.
                 if (bodyj.t_hist.length > 0) {
-                    bodyj.p_exp[bodyj.p_exp.length] = bodyj.p_hist[0];
-                    bodyi.p_exp[bodyi.p_exp.length] = bodyi.p_hist[0];
+                    bodyj.p[bodyj.p.length] = bodyj.p_hist[0];
+                    bodyi.p[bodyi.p.length] = bodyi.p_hist[0];
     
-                    bodyj.v_exp[bodyj.v_exp.length] = bodyj.v_hist[0];
-                    bodyi.v_exp[bodyi.v_exp.length] = bodyi.v_hist[0];
+                    bodyj.v[bodyj.v.length] = bodyj.v_hist[0];
+                    bodyi.v[bodyi.v.length] = bodyi.v_hist[0];
                 }
                 else {
-                    bodyj.p_exp[bodyj.p_exp.length] = bodyj.p_exp[0];
-                    bodyi.p_exp[bodyi.p_exp.length] = bodyi.p_exp[0];
+                    bodyj.p[bodyj.p.length] = bodyj.p[0];
+                    bodyi.p[bodyi.p.length] = bodyi.p[0];
     
-                    bodyj.v_exp[bodyj.v_exp.length] = bodyj.v_exp[0];
-                    bodyi.v_exp[bodyi.v_exp.length] = bodyi.v_exp[0];
+                    bodyj.v[bodyj.v.length] = bodyj.v[0];
+                    bodyi.v[bodyi.v.length] = bodyi.v[0];
                 }
                 return true;
             }
@@ -231,12 +231,12 @@ let populate_trajectories = function(system, tIncrease, dt) {
     system.pBodies = [system.pBodies[0]];
     // Clear the future projections for the bodies, ready for new data to be pusehd into them.
     system.pBodies[0].forEach(body => {
-        body.t_exp = [body.t_exp[0]]; 
-        body.p_exp = [body.p_exp[0]];
-        body.v_exp = [body.v_exp[0]];
+        body.t = [body.t[0]]; 
+        body.p = [body.p[0]];
+        body.v = [body.v[0]];
     });
 
-    let tSim = system.pBodies[0][0].t_exp[0]; // The time up to which the simulation has been completed.
+    let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
     let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
 
     let a;
@@ -262,9 +262,9 @@ let populate_trajectories = function(system, tIncrease, dt) {
                 tSim = integrator.t + tInit;
                 for (let bodyNum = 0; bodyNum < bodies.length; bodyNum++) {
                     let body = bodies[bodyNum]
-                    body.t_exp.push(tSim);
-                    body.p_exp.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
-                    body.v_exp.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
+                    body.t.push(tSim);
+                    body.p.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
+                    body.v.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
                 }
 
                 // If collision, take action and then break
@@ -291,8 +291,8 @@ let plot_orbits = function(system) {
     let data = []
     bodies.forEach(body => {
         var trace = {
-            x: col_2d(body.p_exp, 0),
-            y: col_2d(body.p_exp, 1),
+            x: col_2d(body.p, 0),
+            y: col_2d(body.p, 1),
             mode: 'lines+markers',
             type: 'scatter'
         };
@@ -318,9 +318,9 @@ let plot_orbits = function(system) {
     ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
 
     bodies.forEach(body => {
-        drawLine(ctx, body.p_exp);
+        drawLine(ctx, body.p);
         ctx.beginPath();
-        ctx.arc(body.p_exp[0][0], body.p_exp[0][1], body.r_g, 0, Math.PI*2);
+        ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
         ctx.fillStyle = "green";
         ctx.fill();
         ctx.closePath();
