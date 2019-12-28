@@ -105,7 +105,7 @@ let defineBodies = function() {
         new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
         new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
         new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
-        new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e2], [0, 0], 100),
+        new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e1], [0, 0], 100),
         // new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
     ]
 
@@ -128,7 +128,7 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
     x2' = q'' = G*mj / ||qi-qj||**3 * (qi-qj)
     */
 
-    let common;
+    let body_sep;
     for (let i = 0; i < nBodies; i++) {
         // x1' = x2 = q'
         dydt[4*i] = y[4*i+2];  // v in x directino
@@ -137,10 +137,23 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
         dydt[4*i+3] = 0;  // a in y direction
         for (let j = 0; j < nBodies; j++) {
             if (i == j) { continue; }
-            common = (G * bodies[j].m
-                      / ((y[4*i] - y[4*j])**2 + (y[4*i+1] - y[4*j+1])**2)**1.5)
-            dydt[4*i+2] += common * (y[4*i] - y[4*j]) * -1;
-            dydt[4*i+3] += common * (y[4*i+1] - y[4*j+1]) * -1;
+            body_sep = ((y[4*i] - y[4*j])**2 
+                        + (y[4*i+1] - y[4*j+1])**2)**0.5;
+
+            let gx = G * bodies[j].m / body_sep**3 * (y[4*i] - y[4*j]) * -1;
+            let gy = G * bodies[j].m / body_sep**3 * (y[4*i+1] - y[4*j+1]) * -1;
+
+            dydt[4*i+2] += gx;
+            dydt[4*i+3] += gy;
+            
+            if (body_sep <= bodies[i].r + bodies[j].r) {
+                dydt[4*i+2] += gx * -5;
+                dydt[4*i+3] += gy * -5;
+
+                // dydt[4*i] /= 10000;  // v in x directino
+                // dydt[4*i+1] /= 10000;  // v in y direction
+
+            }
         }
     }
 }
@@ -237,7 +250,7 @@ let tick_plot = function(bodies, nBodies) {
 let main = function() {
     let bodies, nBodies;
     [bodies, nBodies] = defineBodies()
-    setInterval(tick_plot, 10, bodies, nBodies)
+    setInterval(tick_plot, 50, bodies, nBodies)
 
 }
 
