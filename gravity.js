@@ -59,6 +59,22 @@ let Body = class{
 
     }
 
+    cloneCollision() {
+        /* Clone the current body and set the clone's initial conditions
+           to the current bodie's latest in time expected conditions.
+           The cloned conditions are popped from the current body to avoid
+           duplication.
+        */
+        let clone = new Body(this.name, 
+                             this.m, 
+                             this.p.pop(),
+                             this.v.pop(), 
+                             this.a.slice(), 
+                             this.r, 
+                             this.t.pop());
+        return clone;
+    }
+
     tick(dt) {
         /* tick forward dt seconds time: set the current state of 
         the body to the first element of the expected trajectory,
@@ -199,27 +215,27 @@ let collide = function(system) {
                 // console.log(bodyi.name, bodyj.name);
 
                 // Create new bodies in system, and merge collided objects.
-                
-                // debug: reset state.
-                if (bodyj.t_hist.length > 0) {
-                    bodyj.p[bodyj.p.length] = bodyj.p_hist[0];
-                    bodyi.p[bodyi.p.length] = bodyi.p_hist[0];
-    
-                    bodyj.v[bodyj.v.length] = bodyj.v_hist[0];
-                    bodyi.v[bodyi.v.length] = bodyi.v_hist[0];
-                }
-                else {
-                    bodyj.p[bodyj.p.length] = bodyj.p[0];
-                    bodyi.p[bodyi.p.length] = bodyi.p[0];
-    
-                    bodyj.v[bodyj.v.length] = bodyj.v[0];
-                    bodyi.v[bodyi.v.length] = bodyi.v[0];
-                }
-                return true;
+                let bodiesNew = [];  // To be appended to system.pBodies
+
+                // Clone the bodies which aren't involved in the collision.
+                bodies.forEach((body, cloneBodyNum) => {
+                    
+                    bodiesNew.push(body.cloneCollision());  // debug: clone all.
+                    /*
+                    if (cloneBodyNum != i && cloneBodyNum != j) {
+                        bodiesNew.push(body.cloneCollision());  // debug: clone all.
+                        body.p.shift();
+                        body.v.shift();
+                        body.t.shift();
+                    }
+                    */
+                });
+                system.pBodies.push(bodiesNew)
+                return true; // There was a collision - return true.
             }
         }
     }
-    return false;
+    return false; // There was no collision - return false.
 }
 
 let populate_trajectories = function(system, tIncrease, dt) {
@@ -315,11 +331,3 @@ let main = function() {
 }
 
 main()
-
-
-
-
-
-
-
-
