@@ -13,9 +13,7 @@ canvas.width = WIDTH;
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
     pts.forEach(point => {
-        let x = point[0];
-        let y = point[1];
-        ctx.lineTo(x,y);
+        ctx.lineTo(point[0], point[1]);
     });
     ctx.stroke();
     ctx.closePath();
