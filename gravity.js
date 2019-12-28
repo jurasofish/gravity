@@ -322,7 +322,7 @@ let populate_trajectories = function(system, tIncrease, dt) {
     return 1;
 }
 
-let plot_orbits = function(system) {
+let plot = function(system) {
     /* Plot the expected trajectories of the bodies */
 
     let minx, maxx, miny, maxy;
@@ -349,13 +349,18 @@ let plot_orbits = function(system) {
                 ctx.closePath();
             }
         });
-    })
+    });
+
+    if (MOUSECLICKED) {
+        // Plot 
+        drawLine(ctx, [MOUSEDOWN, MOUSEPOS]);
+    };
 }
 
 let tick_plot = function(system) {
     let dt = 3600*24;
     populate_trajectories(system, 3600*24*350, dt)
-    plot_orbits(system)
+    plot(system)
     system.tick(dt);
 }
 
