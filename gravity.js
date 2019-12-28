@@ -224,11 +224,12 @@ let collide = function(system) {
 let populate_trajectories = function(system, tIncrease, dt) {
     /* mutate all bodies to update their expected trajectories 
     tIncrease is how many more seconds into the future to simulate.
+    Data will be stored in increments of at most dt.
     */
 
-    // Clear future piecewise bodies - that is, only keep the first one.
+    // Start with the first set of bodies.
     system.pBodies = [system.pBodies[0]];
-    // Clear the future projections for the bodies, ready for new data to be pusehd into them.
+    // Clear the expected data for the bodies, ready for newly simulated data.
     system.pBodies[0].forEach(body => {
         body.t = [body.t[0]]; 
         body.p = [body.p[0]];
@@ -238,8 +239,6 @@ let populate_trajectories = function(system, tIncrease, dt) {
     let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
     let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
 
-    let a;
-
     while(tSim < tMax) {
 
         let bodies = system.pBodies.slice(-1)[0];  // Last element is most recent in time.
@@ -247,37 +246,27 @@ let populate_trajectories = function(system, tIncrease, dt) {
         let y0 = get_y0(bodies); // Initial data
         let integrator = ode45(y0, deriv, 0, dt, {tol: TOL, dtMaxMag: dt}); 
         
-        // We have just re-initialized the integrator, so its time will
-        // be zero.
         let tInit = tSim;  // Physical time at which ODE starts.
 
         // Store future trajectories with a time resolution of at least
         // dt, or higher if the ODE solver uses a higher resolution.
-        let moreStepsRequired, tEndSub, collision;
+        let tEndSub;  // Execute ODE steps until this time is reached. An int multiple of dt.
+        let moreStepsRequired;  // True if more steps are required to reach tEndSub.
+        let collision;  // True if a collision has occured: integrator needs to be reset.
         while(tSim < tMax) {
             tEndSub = dt*(Math.floor(integrator.t/dt) + 1); // Next highest integer multiple of dt after tSim.
             while(true) {
                 moreStepsRequired = integrator.step(tEndSub);
                 tSim = integrator.t + tInit;
-                for (let bodyNum = 0; bodyNum < bodies.length; bodyNum++) {
-                    let body = bodies[bodyNum]
+                bodies.forEach( (body, bodyNum) => {
                     body.t.push(tSim);
                     body.p.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
                     body.v.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
-                }
-
-                // If collision, take action and then break
+                })
                 collision = collide(system);
-                if (collision) {
-                    break;
-                }
-                if (!moreStepsRequired) {
-                    break;
-                }
+                if (!moreStepsRequired || collision) {break;}
             }
-
-            // If collision, break - to force re-init of ODE solver.
-            if (collision) {break;}
+            if (collision) {break;}  // If collision, break - to force re-init of ODE solver.
         }
     }
     return 1;
