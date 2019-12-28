@@ -118,7 +118,7 @@ let defineSystem = function() {
 
         tick: function(dt) {
             /* Move system dt seconds forward in time using the expected values. */
-            while (True) {
+            while (true) {
                 let results = new Set([this.pBodies[0].map(body => body.tick(dt))]);
                 if (results.has(true)) {this.pBodies.shift();}
                 else {break;}
