@@ -59,11 +59,12 @@ let Body = class{
 
     }
 
-    cloneCollision() {
+    fork() {
         /* Clone the current body and set the clone's initial conditions
            to the current bodie's latest in time expected conditions.
            The cloned conditions are popped from the current body to avoid
            duplication.
+           That is, fork the current body.
         */
         let clone = new Body(this.name, 
                              this.m, 
@@ -220,7 +221,7 @@ let collide = function(system) {
                 // Clone the bodies which aren't involved in the collision.
                 bodies.forEach((body, cloneBodyNum) => {
                     
-                    bodiesNew.push(body.cloneCollision());  // debug: clone all.
+                    bodiesNew.push(body.fork());  // debug: clone all.
                     /*
                     if (cloneBodyNum != i && cloneBodyNum != j) {
                         bodiesNew.push(body.cloneCollision());  // debug: clone all.
