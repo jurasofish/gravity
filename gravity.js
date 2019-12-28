@@ -40,7 +40,7 @@ let draw_limit = function(bodies) {
     /* given the bodies, determine the min/max x/y to draw everything. */
     let p = [];
     bodies.forEach( body => {
-        p = p.concat([body.p], body.p_exp);
+        p = p.concat(body.p_exp);
     })
     //bodies.map(body => p = p.concat([body.p], body.p_exp));
     let x = col_2d(p, 0);
@@ -50,30 +50,26 @@ let draw_limit = function(bodies) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, r, t=0, t_hist=[], p_hist=[], 
-                v_hist=[], t_exp=[], p_exp=[], v_exp=[]) {
+    constructor(name, m, p, v, a, r) {
         this.name = name; // Name
         this.m = m; // mass (kg)
-        this.p = p; // array of x, y of position (m)
-        this.v = v; // array of x, y of velocity (m/s)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
         this.r = r; // Body radius, for for collissions (m)
         this.r_g = Math.log(r) * 5e8; // Body radius, for graphics.
-        this.t = t; // Time at which the body is at point p.
         
         // store the history of body position over time.
         // This is intended to be updated after simulating,
         // although you could give it initial history if you want.
         // intended to be used for plotting.
-        this.t_hist = t_hist;  // 1D array of time (s)
-        this.p_hist = p_hist;  // 2D array of [x, y] (m)
-        this.v_hist = v_hist;  // 2D array of [x, y] (m/s)
+        this.t_hist = [];  // 1D array of time (s)
+        this.p_hist = [];  // 2D array of [x, y] (m)
+        this.v_hist = [];  // 2D array of [x, y] (m/s)
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
-        this.t_exp = t_exp;  // 1D array of time (s)
-        this.p_exp = p_exp;  // 2D array of [x, y] (m)
-        this.v_exp = v_exp;  // 2D array of [x, y] (m/s)
+        this.t_exp = [0];  // 1D array of time (s)
+        this.p_exp = [p];  // 2D array of [x, y] (m)
+        this.v_exp = [v];  // 2D array of [x, y] (m/s)
 
     }
 
@@ -81,41 +77,61 @@ let Body = class{
         /* tick one step forward in time: set the current state of 
         the body to the first element of the expected trajectory,
         and push the current state onto the history. 
+
+        Return true if more ticks can be performed, otherwise
+        return false.
         */
 
-        let finalTime = this.t + dt;
+        if (this.t_exp.length == 0) {return false;}
 
-        while (this.t < finalTime) {
+        let finalTime = this.t_exp[0] + dt;
 
-            this.t_hist.push(this.t)
-            this.p_hist.push(this.p)
-            this.v_hist.push(this.v)
+        while (this.t_exp[0] < finalTime) {
 
-            this.t = this.t_exp.shift()
-            this.p = this.p_exp.shift()
-            this.v = this.v_exp.shift()
+            this.t_hist.push(this.t_exp.shift())
+            this.p_hist.push(this.p_exp.shift())
+            this.v_hist.push(this.v_exp.shift())
         }
+        return this.t_exp.lenth > 0;
     }
 };
 
-let defineBodies = function() {
+let defineSystem = function() {
+    /* system is an object representing the current system state.
+    The main feature is the pBodies array, which is a piecewise definition
+    of the bodies in the system over time.
 
-    let bodies = [
-        new Body('User', 100e2, [-100e9, -100e9], [1, 3.5e4], [0, 0], 100),
-        new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
-        new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
-        new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
-        new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e2], [0, 0], 100),
-        // new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
-    ]
+    The bodies are defined piecewise to allow bodies to be created/destroyed
+    when a collision event occurs.
 
-    let nBodies = bodies.length  // Number of bodies
+    pBodies[0] ALWAYS contains bodies at the time corresponding to system.t
+    That means bodies are shift()ed off the pBodies array when they are used up.
+    */
+    let system = {
+        // t: 0,
+        // tol: 1e-8,
+        // g: 6.67408e-11,
+        pBodies: [[
+            new Body('User', 100e2, [-100e9, -100e9], [1, 3.5e4], [0, 0], 100),
+            new Body('Sun', 1.98847e30, [0, 0], [0, 0], [0, 0], 695.51e6),
+            new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
+            new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
+            new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e1], [0, 0], 100),
+            // new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
+        ]],
 
-    return [bodies, nBodies];
+        tick: function(dt) {
+            /* Move system dt seconds forward in time using the expected values. */
+            let bodies = system.pBodies[0];
+            bodies.forEach(body => body.tick(dt))
+        },
+    }
+
+    return system;
     
 }
 
-let deriv_full = function(dydt, y, t, bodies, nBodies) {
+let deriv_full = function(dydt, y, t, bodies) {
     /*
     q is body position
 
@@ -129,13 +145,13 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
     */
 
     let common;
-    for (let i = 0; i < nBodies; i++) {
+    for (let i = 0; i < bodies.length; i++) {
         // x1' = x2 = q'
         dydt[4*i] = y[4*i+2];  // v in x directino
         dydt[4*i+1] = y[4*i+3];  // v in y direction
         dydt[4*i+2] = 0;  // a in x direction
         dydt[4*i+3] = 0;  // a in y direction
-        for (let j = 0; j < nBodies; j++) {
+        for (let j = 0; j < bodies.length; j++) {
             if (i == j) { continue; }
             common = (G * bodies[j].m
                       / ((y[4*i] - y[4*j])**2 + (y[4*i+1] - y[4*j+1])**2)**1.5)
@@ -147,47 +163,133 @@ let deriv_full = function(dydt, y, t, bodies, nBodies) {
 
 let get_y0 = function(bodies) {
     /* Return the initial vector for the ODE solver. */ 
-    let y0 = []; // Initial data
+    let y0 = [];
     bodies.forEach(function(body){ 
-        y0.push(body.p[0]);  // init x
-        y0.push(body.p[1]);  // init y
-        y0.push(body.v[0]);  // init v in x direction
-        y0.push(body.v[1]);  // init v in y direction
+        y0.push(body.p_exp.slice(-1)[0][0]);  // init x
+        y0.push(body.p_exp.slice(-1)[0][1]);  // init y
+        y0.push(body.v_exp.slice(-1)[0][0]);  // init v in x direction
+        y0.push(body.v_exp.slice(-1)[0][1]);  // init v in y direction
     });
     return y0;
 }
 
-let populate_trajectories = function(bodies, nBodies, tmax, dt) {
-    /* mutate all bodies to update their expected trajectories */
-
-    let y0 = get_y0(bodies); // Initial data
-    let deriv = (dydt, y, t) => deriv_full(dydt, y, t, bodies, nBodies);
-    let integrator = ode45(y0, deriv, 0, dt, {tol: TOL, dtMaxMag: dt});
+let collide = function(system) {
+    /* If a collision has occured, modify system accordingly and return true.
     
-    // Empty the arrays, ready for new data to be pusehd into them.
-    bodies.forEach(body => {body.t_exp = []; body.p_exp = [], body.v_exp=[];})
+       Modifying system will probably mean creating a new array of bodies
+       in the pBodies array where some bodies have been merged.
 
-    // Store future trajectories with a time resolution of at least
-    // dt, or higher if the ODE solver uses a higher resolution.
-    let moreStepsRequired, tEndSub;
-    while(integrator.t < tmax) {
-        tEndSub = integrator.t  + dt;
-        while(true) {
-            moreStepsRequired = integrator.step(tEndSub);
-            for (let bodyNum = 0; bodyNum < nBodies; bodyNum++) {
-                let body = bodies[bodyNum]
-                body.t_exp.push(integrator.t + body.t);
-                body.p_exp.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
-                body.v_exp.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
+       Return false if no collision.
+    */
+
+   let bodies = system.pBodies.slice(-1)[0];
+    let bodyi, bodyj, i_x, i_y, i_r, j_x, j_y, j_r, body_sep;
+    for (let i = 0; i < bodies.length; i++) {
+        bodyi = bodies[i];
+        i_x = bodyi.p_exp.slice(-1)[0][0];
+        i_y = bodyi.p_exp.slice(-1)[0][1];
+        i_r = bodyi.r;
+
+        for (let j = i+1; j < bodies.length; j++) {
+
+            bodyj = bodies[j];
+            j_x = bodyj.p_exp.slice(-1)[0][0];
+            j_y = bodyj.p_exp.slice(-1)[0][1];
+            j_r = bodyj.r;
+            body_sep = ((i_x - j_x)**2  + (i_y - j_y)**2)**0.5;
+            if (body_sep <= j_r + i_r) {
+                // console.log(bodyi.name, bodyj.name);
+
+                // Create new bodies in system, and merge collided objects.
+                
+                // debug: reset state.
+                if (bodyj.t_hist.length > 0) {
+                    bodyj.p_exp[bodyj.p_exp.length] = bodyj.p_hist[0];
+                    bodyi.p_exp[bodyi.p_exp.length] = bodyi.p_hist[0];
+    
+                    bodyj.v_exp[bodyj.v_exp.length] = bodyj.v_hist[0];
+                    bodyi.v_exp[bodyi.v_exp.length] = bodyi.v_hist[0];
+                }
+                else {
+                    bodyj.p_exp[bodyj.p_exp.length] = bodyj.p_exp[0];
+                    bodyi.p_exp[bodyi.p_exp.length] = bodyi.p_exp[0];
+    
+                    bodyj.v_exp[bodyj.v_exp.length] = bodyj.v_exp[0];
+                    bodyi.v_exp[bodyi.v_exp.length] = bodyi.v_exp[0];
+                }
+                return true;
             }
-            if (!moreStepsRequired) {break;}
         }
     }
+    return false;
 }
 
-let plot_orbits = function(bodies) {
+let populate_trajectories = function(system, tIncrease, dt) {
+    /* mutate all bodies to update their expected trajectories 
+    tIncrease is how many more seconds into the future to simulate.
+    */
+
+    // Clear future piecewise bodies - that is, only keep the first one.
+    system.pBodies = [system.pBodies[0]];
+    // Clear the future projections for the bodies, ready for new data to be pusehd into them.
+    system.pBodies[0].forEach(body => {
+        body.t_exp = [body.t_exp[0]]; 
+        body.p_exp = [body.p_exp[0]];
+        body.v_exp = [body.v_exp[0]];
+    });
+
+    let tSim = system.pBodies[0][0].t_exp[0]; // The time up to which the simulation has been completed.
+    let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
+
+    let a;
+
+    while(tSim < tMax) {
+
+        let bodies = system.pBodies.slice(-1)[0];  // Last element is most recent in time.
+        let deriv = (dydt, y, t) => deriv_full(dydt, y, t, bodies);
+        let y0 = get_y0(bodies); // Initial data
+        let integrator = ode45(y0, deriv, 0, dt, {tol: TOL, dtMaxMag: dt}); 
+        
+        // We have just re-initialized the integrator, so its time will
+        // be zero.
+        let tInit = tSim;  // Physical time at which ODE starts.
+
+        // Store future trajectories with a time resolution of at least
+        // dt, or higher if the ODE solver uses a higher resolution.
+        let moreStepsRequired, tEndSub, collision;
+        while(tSim < tMax) {
+            tEndSub = dt*(Math.floor(integrator.t/dt) + 1); // Next highest integer multiple of dt after tSim.
+            while(true) {
+                moreStepsRequired = integrator.step(tEndSub);
+                tSim = integrator.t + tInit;
+                for (let bodyNum = 0; bodyNum < bodies.length; bodyNum++) {
+                    let body = bodies[bodyNum]
+                    body.t_exp.push(tSim);
+                    body.p_exp.push([integrator.y[4*bodyNum], integrator.y[4*bodyNum+1]])
+                    body.v_exp.push([integrator.y[4*bodyNum+2], integrator.y[4*bodyNum+3]])
+                }
+
+                // If collision, take action and then break
+                collision = collide(system);
+                if (collision) {
+                    break;
+                }
+                if (!moreStepsRequired) {
+                    break;
+                }
+            }
+
+            // If collision, break - to force re-init of ODE solver.
+            if (collision) {break;}
+        }
+    }
+    return 1;
+}
+
+let plot_orbits = function(system) {
     /* Plot the expected trajectories of the bodies */
 
+    let bodies = system.pBodies[0];
     let data = []
     bodies.forEach(body => {
         var trace = {
@@ -220,24 +322,23 @@ let plot_orbits = function(bodies) {
     bodies.forEach(body => {
         drawLine(ctx, body.p_exp);
         ctx.beginPath();
-        ctx.arc(body.p[0], body.p[1], body.r_g, 0, Math.PI*2);
+        ctx.arc(body.p_exp[0][0], body.p_exp[0][1], body.r_g, 0, Math.PI*2);
         ctx.fillStyle = "green";
         ctx.fill();
         ctx.closePath();
     });
 }
 
-let tick_plot = function(bodies, nBodies) {
+let tick_plot = function(system) {
     let dt = 3600*24;
-    populate_trajectories(bodies, nBodies, 3600*24*350, dt)
-    plot_orbits(bodies)
-    bodies.forEach(body => body.tick(dt))
+    populate_trajectories(system, 3600*24*350, dt)
+    plot_orbits(system)
+    system.tick(dt);
 }
 
 let main = function() {
-    let bodies, nBodies;
-    [bodies, nBodies] = defineBodies()
-    setInterval(tick_plot, 10, bodies, nBodies)
+    let system = defineSystem();
+    setInterval(tick_plot, 10, system)
 
 }
 
