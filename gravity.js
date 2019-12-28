@@ -9,6 +9,12 @@ let WIDTH = 600;
 canvas.height = HEIGHT;
 canvas.width = WIDTH;
 
+// All coordinates are physical.
+let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
+let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
+let MOUSEUP = [1, 1];  // Position where mouse click was released.
+let MOUSEPOS = [2, 2];  // Position of mouse hovering.
+
 
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
@@ -359,5 +365,47 @@ let main = function() {
     setInterval(tick_plot, 10, system)
 
 }
+
+let transformCoords = function(p) {
+    let mat = ctx.getTransform();
+    mat.invertSelf();
+    return [
+        p[0] * mat.a + p[1] * mat.c + mat.e,
+        p[0] * mat.b + p[1] * mat.d + mat.f
+    ];
+}
+
+canvas.addEventListener('mousedown', e => {
+    let x = e.clientX - canvas.offsetLeft;
+    let y = e.clientY - canvas.offsetTop;
+    [x, y] = transformCoords([x, y]);
+    MOUSEDOWN = [x, y];
+    MOUSECLICKED = true;
+});
+
+canvas.addEventListener('mouseup', e => {
+    let x = e.clientX - canvas.offsetLeft;
+    let y = e.clientY - canvas.offsetTop;
+    [x, y] = transformCoords([x, y]);
+    MOUSEUP = [x, y];
+    MOUSECLICKED = false;
+});
+
+canvas.addEventListener('mouseout', e => {
+    let x = e.clientX - canvas.offsetLeft;
+    let y = e.clientY - canvas.offsetTop;
+    [x, y] = transformCoords([x, y]);
+    MOUSEUP = [0, 0];
+    MOUSEDOWN = [0, 0];
+    MOUSECLICKED = false;
+    MOUSEPOS = [0, 0];
+});
+
+canvas.addEventListener('mousemove', e => {
+    let x = e.clientX - canvas.offsetLeft;
+    let y = e.clientY - canvas.offsetTop;
+    [x, y] = transformCoords([x, y]);
+    MOUSEPOS = [x, y];
+});
 
 main()
