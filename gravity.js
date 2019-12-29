@@ -17,6 +17,7 @@ let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 
 let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
+let FINALISEBODIES = false; // True if draft bodies should be finalised in the next tick.
 let TICKS = 0;  // How many ticks to move in time while GO is false.
 
 let drawLine = function(ctx, pts) {
@@ -45,12 +46,15 @@ let min_1d = function(x) {
 
 let Body = class{
     /* A body is a physical object which produces and is affected by gravity. */
-    constructor(name, m, p, v, a, r, t=0) {
+    constructor(name, m, p, v, a, r, t=0, draft=false) {
         this.name = name; // Name
         this.m = m; // mass (kg)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
         this.r = r; // Body radius, for for collissions (m)
         this.r_g = Math.log(r) * 5e8; // Body radius, for graphics.
+        // true if the body is still being drawn. This should be set to false
+        // on mouseup, indicating that the body has been finalised.
+        this.draft = draft;
         
         // Store the expected future position over time.
         // Similar to t_hist and p_hist.
@@ -284,15 +288,17 @@ let collide = function(system) {
     return false; // There was no collision - return false.
 }
 
-let updateUser = function(system) {
+let createDraftBody = function(system) {
     if (MOUSECLICKED && !GO) {
-        let user = system.pBodies[0][0];
-        user.p[0] = MOUSEDOWN;
+        let p = MOUSEDOWN;
         let k = 5e6;
-        user.v[0] = [
+        let v = [
             (MOUSEDOWN[0] - MOUSEPOS[0])/k,
             (MOUSEDOWN[1] - MOUSEPOS[1])/k,
         ]
+        let t = system.pBodies[0][0].t[0]
+        let user = new Body('Userdd', 100e2, p, v, [0, 0], 100, t, true);
+        system.pBodies[0].push(user)
     }
 }
 
@@ -311,7 +317,16 @@ let populate_trajectories = function(system, tIncrease, dt) {
         body.v = [body.v[0]];
     });
 
-    updateUser(system);  // Update user ship based on current input state.
+    // Finalise bodies, if inputs triggered it.
+    if (FINALISEBODIES) {
+        system.pBodies[0].forEach(body => {body.draft=false;});
+        FINALISEBODIES=false;
+    }
+
+    // Discard the draft bodies.
+    system.pBodies[0] = system.pBodies[0].filter(body => !body.draft)
+
+    createDraftBody(system);  // Create draft body based on current input state.
 
     let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
     let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
@@ -419,6 +434,7 @@ let transformCoords = function(p) {
 canvas.addEventListener('mousedown', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
+    GO = false;
     [x, y] = transformCoords([x, y]);
     MOUSEDOWN = [x, y];
     MOUSECLICKED = true;
@@ -433,6 +449,7 @@ canvas.addEventListener('mouseup', e => {
         GO = true;
     }
     MOUSECLICKED = false;
+    FINALISEBODIES = true;
 });
 
 canvas.addEventListener('mouseout', e => {
