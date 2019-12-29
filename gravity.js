@@ -17,6 +17,7 @@ let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 
 let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
+let TICKS = 0;  // How many ticks to move in time while GO is false.
 
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
@@ -171,6 +172,12 @@ let defineSystem = function() {
                 if (results.has(true)) {this.pBodies.shift();}
                 else {break;}
             }
+        },
+
+        untick: function(dt) {
+            /* Move system dt seconds back in time using the historical values. */
+            // TODO: implement
+            console.log('untick not implemented yet');
         },
 
         draw_limit: function() {
@@ -385,8 +392,13 @@ let tick_plot = function(system) {
 
     populate_trajectories(system, 3600*24*350, dt)
     plot(system)
-    if (GO) {
+    if (GO || TICKS > 0) {
         system.tick(dt);
+        TICKS = Math.max(0, TICKS-1);
+    }
+    if (TICKS < 0) {
+        system.untick(dt);
+        TICKS = Math.min(0, TICKS+1);
     }
 }
 
@@ -442,7 +454,16 @@ canvas.addEventListener('mousemove', e => {
 
 document.addEventListener("keydown", event => {
     console.log(event.keyCode);
-    if (event.keyCode == 32) {GO = !GO;};
-  });
+    switch(event.keyCode) {
+        case 32:  // space bar
+            GO = !GO; break;
+        case 37: // left arrow
+            TICKS--; break;
+        case 39: // right arrow
+            TICKS++; break;
+        default:
+            break;
+    }
+});
 
 main()
