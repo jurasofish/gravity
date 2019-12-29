@@ -440,4 +440,9 @@ canvas.addEventListener('mousemove', e => {
     MOUSEPOS = [x, y];
 });
 
+document.addEventListener("keydown", event => {
+    console.log(event.keyCode);
+    if (event.keyCode == 32) {GO = !GO;};
+  });
+
 main()
