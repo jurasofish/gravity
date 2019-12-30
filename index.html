@@ -4,15 +4,29 @@
     <meta charset="utf-8" />
     <title>yeet G</title>
     <style>
-    	* { padding: 0; margin: 0; }
-    	canvas { background: #eee; display: block; margin: 0 auto; }
+    	* {padding: 0; margin: 0; }
+      #parent {
+        display: flex;
+      }
+      #myCanvas {
+        background: #eee;
+      }
+      #controls {
+        width: 200px;
+        background: lightblue;
+      }
     </style>
     <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
     <!-- <script src="lib/plotly-1.51.3.min.js"></script> -->
 </head>
 <body>
 
-<canvas id="myCanvas" width="480" height="480"></canvas>
+<div id="parent">
+  <canvas id="myCanvas" width="480" height="480"></canvas>
+  <div id="controls" width="480" height="480">
+    Mass (kg) <input type="text" name="mass" id="mass" value="1e5">
+  </div>
+</div>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
 

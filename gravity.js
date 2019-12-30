@@ -5,7 +5,7 @@ const TOL = 1e-8;  // Tolerance for ODE solver.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
-let windowSize = () => [window.innerHeight, window.innerWidth];
+let windowSize = () => [window.innerHeight, window.innerWidth-200];
 [canvas.height, canvas.width] = windowSize();
 window.addEventListener('resize', () => {
     [canvas.height, canvas.width] = windowSize();
