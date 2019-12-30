@@ -3,8 +3,14 @@
 <head>
     <meta charset="utf-8" />
     <title>yeet G</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
     <style>
-    	* {padding: 0; margin: 0; }
+    	* {
+        padding: 0;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 100%;
+        }
       #parent {
         display: flex;
       }
@@ -13,7 +19,19 @@
       }
       #controls {
         width: 200px;
-        background: lightblue;
+        background: #eee;
+      }
+      input[type=text] {
+          border: 1px transparent;
+          font-size: 16px;
+          padding: 5px;
+          width: 80px;
+        background: #eee;
+      }
+      .block label {
+        display: inline-block;
+        width: 100px;
+        text-align: right;
       }
     </style>
     <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
@@ -24,7 +42,14 @@
 <div id="parent">
   <canvas id="myCanvas" width="480" height="480"></canvas>
   <div id="controls" width="480" height="480">
-    Mass (kg) <input type="text" name="mass" id="mass" value="1e5">
+    <div class="block">
+      <label>Mass (kg)</label>
+      <input type="text" name="mass" id="mass" value="1e5">
+    </div>
+    <div class="block">
+      <label>dt (s)</label>
+      <input type="text" name="dt" id="dt" value="3600">
+    </div>
   </div>
 </div>
 
