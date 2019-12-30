@@ -446,7 +446,7 @@ canvas.addEventListener('mouseup', e => {
     [x, y] = transformCoords([x, y]);
     MOUSEUP = [x, y];
     if (MOUSECLICKED) {
-        GO = true;
+        // GO = true;
     }
     MOUSECLICKED = false;
     FINALISEBODIES = true;
