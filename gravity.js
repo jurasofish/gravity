@@ -7,7 +7,10 @@ let ctx = canvas.getContext("2d");
 
 let windowSize = () => [window.innerHeight, window.innerWidth];
 [canvas.height, canvas.width] = windowSize();
-window.addEventListener('resize', () => [canvas.height, canvas.width] = windowSize());
+window.addEventListener('resize', () => {
+    [canvas.height, canvas.width] = windowSize();
+    SINGLERESCALE = true;  // Rescale canvas since window is resized.
+});
 
 // All coordinates are physical.
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
@@ -19,6 +22,7 @@ let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
 let FINALISEBODIES = false; // True if draft bodies should be finalised in the next tick.
 let TICKS = 0;  // How many ticks to move in time while GO is false.
+let SINGLERESCALE = true;  // True to recalc view once on next frame.
 
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
@@ -367,18 +371,26 @@ let populate_trajectories = function(system, tIncrease, dt) {
 let plot = function(system) {
     /* Plot the expected trajectories of the bodies */
 
-    let minx, maxx, miny, maxy;
-    [minx, maxx, miny, maxy] = system.draw_limit()
-    
-    // Apply transformations to make plotting possible in real cartesian coordinates.
+    // Clear canvas
+    ctx.save()
     ctx.resetTransform()
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
-    let scale = Math.min(xScale, yScale); // Same x and y scale
-    ctx.transform(1, 0, 0, -1, 0, canvas.height); // Convert to cartesian
-    ctx.transform(scale, 0, 0, scale, 0, 0); // scale
-    ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
-    ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
+    ctx.restore()
+
+    if (GO || TICKS != 0 || SINGLERESCALE) {
+        // Apply transformations to make plotting possible in real cartesian coordinates.
+        let minx, maxx, miny, maxy;
+        [minx, maxx, miny, maxy] = system.draw_limit()
+        let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
+        let scale = Math.min(xScale, yScale); // Same x and y scale
+
+        ctx.resetTransform()
+        ctx.transform(1, 0, 0, -1, 0, canvas.height); // Convert to cartesian
+        ctx.transform(scale, 0, 0, scale, 0, 0); // scale
+        ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
+        ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
+        SINGLERESCALE = false;
+    };
 
     system.pBodies.forEach( (bodies, bodiesIdx) => {
         bodies.forEach(body => {
