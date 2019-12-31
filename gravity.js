@@ -16,6 +16,7 @@ window.addEventListener('resize', () => {
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
+let MOUSECLICKMATRIX = null;  // transformtion matrix from when mouse was clicked.
 
 let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
