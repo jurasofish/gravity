@@ -460,9 +460,7 @@ canvas.addEventListener('mouseup', e => {
 });
 
 canvas.addEventListener('mouseout', e => {
-    MOUSEDOWN = [0, 0];
     MOUSECLICKED = false;
-    MOUSEPOS = [0, 0];
 });
 
 canvas.addEventListener('mousemove', e => {
