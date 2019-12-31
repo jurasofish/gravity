@@ -5,9 +5,6 @@ const TOL = 1e-8;  // Tolerance for ODE solver.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
-// Return current matrix to transform from canvas to physical coords
-let getTransMatrix = () => ctx.getTransform().invertSelf();
-
 let windowSize = () => [window.innerHeight, window.innerWidth-200];
 [canvas.height, canvas.width] = windowSize();
 window.addEventListener('resize', () => {
@@ -18,7 +15,7 @@ window.addEventListener('resize', () => {
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
-let MOUSECLICKMATRIX = getTransMatrix();  // transformtion matrix from when mouse was clicked.
+let MOUSECLICKMATRIX = null;  // transformtion matrix from when mouse was clicked.
 
 let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
@@ -433,6 +430,9 @@ let main = function() {
     setInterval(tick_plot, 10, system)
 }
 
+// Return current matrix to transform from canvas to physical coords
+let getTransMatrix = () => ctx.getTransform().invertSelf();
+
 let transformCoords = function(p, mat=getTransMatrix()) {
     return [
         p[0] * mat.a + p[1] * mat.c + mat.e,
@@ -447,6 +447,7 @@ canvas.addEventListener('mousedown', e => {
     GO = false;
     [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEDOWN = [x, y];
+    MOUSEPOS = [x, y];
     MOUSECLICKED = true;
 });
 
@@ -467,6 +468,9 @@ canvas.addEventListener('mouseout', e => {
 canvas.addEventListener('mousemove', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
+    if (MOUSECLICKMATRIX == null) {
+        MOUSECLICKMATRIX = getTransMatrix();
+    }
     [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEPOS = [x, y];
 });
