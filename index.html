@@ -10,6 +10,7 @@
         margin: 0;
         font-family: 'Montserrat', sans-serif;
         font-size: 100%;
+        color: #545454;
         }
       #parent {
         display: flex;
@@ -20,6 +21,11 @@
       #controls {
         width: 200px;
         background: #eee;
+      }
+      #error {
+        position: relative;
+        top: 50px;
+        color: #eb6572;
       }
       input[type=text] {
           border: 1px transparent;
@@ -47,9 +53,16 @@
       <input type="text" name="mass" id="mass" value="1e5">
     </div>
     <div class="block">
-      <label>dt (s)</label>
-      <input type="text" name="dt" id="dt" value="3600">
+      <label>Radius (m)</label>
+      <input type="text" name="mass" id="mass" value="100">
     </div>
+    <div class="block">
+      <label>&Delta;t (hours)</label>
+      <input type="text" name="dt" id="dt" value="0.5">
+    </div>
+
+    <div id="error"></div>
+
   </div>
 </div>
 

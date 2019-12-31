@@ -413,7 +413,9 @@ let plot = function(system) {
 
 let tick_plot = function(system) {
     let dt = 3600*24/2;
-    dt = parseFloat(document.getElementById("dt").value);
+    dt = parseFloat(document.getElementById("dt").value)*3600*24;
+
+    document.getElementById("error").innerHTML = dt;
 
 
     // Based on current mouse click and drag status,
