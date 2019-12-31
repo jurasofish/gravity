@@ -463,9 +463,6 @@ canvas.addEventListener('mousedown', e => {
 });
 
 canvas.addEventListener('mouseup', e => {
-    let x = e.clientX - canvas.offsetLeft;
-    let y = e.clientY - canvas.offsetTop;
-    [x, y] = transformCoords([x, y]);
     if (MOUSECLICKED) {
         // GO = true;
     }
@@ -474,9 +471,6 @@ canvas.addEventListener('mouseup', e => {
 });
 
 canvas.addEventListener('mouseout', e => {
-    let x = e.clientX - canvas.offsetLeft;
-    let y = e.clientY - canvas.offsetTop;
-    [x, y] = transformCoords([x, y]);
     MOUSEDOWN = [0, 0];
     MOUSECLICKED = false;
     MOUSEPOS = [0, 0];
