@@ -485,6 +485,10 @@ canvas.addEventListener('mousemove', e => {
 
 document.addEventListener("keydown", event => {
     console.log(event.keyCode);
+    if(event.target.tagName.toLowerCase() != 'body') {
+        return;
+    };
+    
     switch(event.keyCode) {
         case 32:  // space bar
             GO = !GO; break;
