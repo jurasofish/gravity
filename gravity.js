@@ -438,9 +438,7 @@ let main = function() {
     setInterval(tick_plot, 10, system)
 }
 
-let transformCoords = function(p) {
-    let mat = ctx.getTransform();
-    mat.invertSelf();
+let transformCoords = function(p, mat=ctx.getTransform().invertSelf()) {
     return [
         p[0] * mat.a + p[1] * mat.c + mat.e,
         p[0] * mat.b + p[1] * mat.d + mat.f
