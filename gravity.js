@@ -490,7 +490,7 @@ document.addEventListener("keydown", event => {
     if(event.target.tagName.toLowerCase() != 'body') {
         return;
     };
-    
+
     switch(event.keyCode) {
         case 32:  // space bar
             GO = !GO; break;
