@@ -5,6 +5,9 @@ const TOL = 1e-8;  // Tolerance for ODE solver.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
+// Return current matrix to transform from canvas to physical coords
+let getTransMatrix = () => ctx.getTransform().invertSelf();
+
 let windowSize = () => [window.innerHeight, window.innerWidth-200];
 [canvas.height, canvas.width] = windowSize();
 window.addEventListener('resize', () => {
@@ -16,7 +19,7 @@ window.addEventListener('resize', () => {
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
-let MOUSECLICKMATRIX = null;  // transformtion matrix from when mouse was clicked.
+let MOUSECLICKMATRIX = getTransMatrix();  // transformtion matrix from when mouse was clicked.
 
 let GO = false;  // If true, tick system after every frame.
 // GO = true;  // debug
@@ -438,11 +441,6 @@ let tick_plot = function(system) {
 let main = function() {
     let system = defineSystem();
     setInterval(tick_plot, 10, system)
-}
-
-let getTransMatrix = function() {
-    /* Return current matrix to transform from canvas to physical coords */
-    return ctx.getTransform().invertSelf();
 }
 
 let transformCoords = function(p, mat=getTransMatrix()) {
