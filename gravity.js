@@ -486,6 +486,8 @@ document.addEventListener("keydown", event => {
             TICKS--; break;
         case 39: // right arrow
             TICKS++; break;
+        case 67: // c key
+            MOUSECLICKED = false; break;
         default:
             break;
     }
