@@ -377,7 +377,8 @@ let plot = function(system) {
     ctx.restore()
 
     // if (GO || TICKS != 0 || SINGLERESCALE) {
-    if (!MOUSECLICKED) {
+    // if (!MOUSECLICKED) {
+    if (true) {
         // Apply transformations to make plotting possible in real cartesian coordinates.
         let minx, maxx, miny, maxy;
         [minx, maxx, miny, maxy] = system.draw_limit()
@@ -438,7 +439,12 @@ let main = function() {
     setInterval(tick_plot, 10, system)
 }
 
-let transformCoords = function(p, mat=ctx.getTransform().invertSelf()) {
+let getTransMatrix = function() {
+    /* Return current matrix to transform from canvas to physical coords */
+    return ctx.getTransform().invertSelf();
+}
+
+let transformCoords = function(p, mat=getTransMatrix()) {
     return [
         p[0] * mat.a + p[1] * mat.c + mat.e,
         p[0] * mat.b + p[1] * mat.d + mat.f
@@ -448,8 +454,9 @@ let transformCoords = function(p, mat=ctx.getTransform().invertSelf()) {
 canvas.addEventListener('mousedown', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
+    MOUSECLICKMATRIX = getTransMatrix();
     GO = false;
-    [x, y] = transformCoords([x, y]);
+    [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEDOWN = [x, y];
     MOUSECLICKED = true;
 });
@@ -477,7 +484,7 @@ canvas.addEventListener('mouseout', e => {
 canvas.addEventListener('mousemove', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
-    [x, y] = transformCoords([x, y]);
+    [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEPOS = [x, y];
 });
 
