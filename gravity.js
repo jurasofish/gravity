@@ -15,7 +15,6 @@ window.addEventListener('resize', () => {
 // All coordinates are physical.
 let MOUSECLICKED = false; // true if mouse is clicked. probs not perfect.
 let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
-let MOUSEUP = [0, 0];  // Position where mouse click was released.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 
 let GO = false;  // If true, tick system after every frame.
@@ -461,7 +460,6 @@ canvas.addEventListener('mouseup', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
     [x, y] = transformCoords([x, y]);
-    MOUSEUP = [x, y];
     if (MOUSECLICKED) {
         // GO = true;
     }
@@ -473,7 +471,6 @@ canvas.addEventListener('mouseout', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
     [x, y] = transformCoords([x, y]);
-    MOUSEUP = [0, 0];
     MOUSEDOWN = [0, 0];
     MOUSECLICKED = false;
     MOUSEPOS = [0, 0];
