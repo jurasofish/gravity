@@ -377,7 +377,8 @@ let plot = function(system) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.restore()
 
-    if (GO || TICKS != 0 || SINGLERESCALE) {
+    // if (GO || TICKS != 0 || SINGLERESCALE) {
+    if (!MOUSECLICKED) {
         // Apply transformations to make plotting possible in real cartesian coordinates.
         let minx, maxx, miny, maxy;
         [minx, maxx, miny, maxy] = system.draw_limit()
