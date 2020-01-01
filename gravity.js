@@ -304,9 +304,9 @@ let createDraftBody = function(system, inputs) {
     }
 }
 
-let populate_trajectories = function(system, tIncrease, inputs) {
+let populate_trajectories = function(system, inputs) {
     /* mutate all bodies to update their expected trajectories 
-    tIncrease is how many more seconds into the future to simulate.
+    inputs.lookahead is how many more seconds into the future to simulate.
     Data will be stored in increments of at most inputs.dt.
     */
 
@@ -331,7 +331,7 @@ let populate_trajectories = function(system, tIncrease, inputs) {
     createDraftBody(system, inputs);  // Create draft body based on current input state.
 
     let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
-    let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
+    let tMax = tSim + inputs.lookahead;  // When simulation reaches tMax, stop.
 
     while(tSim < tMax) {
 
@@ -417,6 +417,7 @@ let get_inputs = function() {
         m: Number(document.getElementById("mass").value),
         r: Number(document.getElementById("radius").value),
         dt: Number(document.getElementById("dt").value)*3600*24,
+        lookahead: Number(document.getElementById("lookahead").value)*3600*24,
     } 
 
     Object.keys(inputs).forEach((key) => {
@@ -440,7 +441,7 @@ let tick_plot = function(system) {
     // Based on current mouse click and drag status,
     // modify the bodies to include the user body.
 
-    populate_trajectories(system, 3600*24*350, inputs)
+    populate_trajectories(system, inputs)
     plot(system)
     if (GO || TICKS > 0) {
         system.tick(inputs.dt);
