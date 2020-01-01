@@ -290,7 +290,7 @@ let collide = function(system) {
     return false; // There was no collision - return false.
 }
 
-let createDraftBody = function(system) {
+let createDraftBody = function(system, inputs) {
     if (MOUSECLICKED && !GO) {
         let p = MOUSEDOWN;
         let k = 5e6;
@@ -299,15 +299,15 @@ let createDraftBody = function(system) {
             (MOUSEDOWN[1] - MOUSEPOS[1])/k,
         ]
         let t = system.pBodies[0][0].t[0]
-        let user = new Body('Userdd', 100e2, p, v, [0, 0], 100, t, true);
+        let user = new Body('Userdd', inputs.m, p, v, [0, 0], inputs.r, t, true);
         system.pBodies[0].push(user)
     }
 }
 
-let populate_trajectories = function(system, tIncrease, dt) {
+let populate_trajectories = function(system, tIncrease, inputs) {
     /* mutate all bodies to update their expected trajectories 
     tIncrease is how many more seconds into the future to simulate.
-    Data will be stored in increments of at most dt.
+    Data will be stored in increments of at most inputs.dt.
     */
 
     // Start with the first set of bodies.
@@ -328,7 +328,7 @@ let populate_trajectories = function(system, tIncrease, dt) {
     // Discard the draft bodies.
     system.pBodies[0] = system.pBodies[0].filter(body => !body.draft)
 
-    createDraftBody(system);  // Create draft body based on current input state.
+    createDraftBody(system, inputs);  // Create draft body based on current input state.
 
     let tSim = system.pBodies[0][0].t[0]; // The time up to which the simulation has been completed.
     let tMax = tSim + tIncrease;  // When simulation reaches tMax, stop.
@@ -338,7 +338,7 @@ let populate_trajectories = function(system, tIncrease, dt) {
         let bodies = system.pBodies.slice(-1)[0];  // Last element is most recent in time.
         let deriv = (dydt, y, t) => deriv_full(dydt, y, t, bodies);
         let y0 = get_y0(bodies); // Initial data
-        let integrator = ode45(y0, deriv, 0, dt, {tol: TOL, dtMaxMag: dt}); 
+        let integrator = ode45(y0, deriv, 0, inputs.dt, {tol: TOL, dtMaxMag: inputs.dt}); 
         
         let tInit = tSim;  // Physical time at which ODE starts.
 
@@ -348,7 +348,8 @@ let populate_trajectories = function(system, tIncrease, dt) {
         let moreStepsRequired;  // True if more steps are required to reach tEndSub.
         let collision;  // True if a collision has occured: integrator needs to be reset.
         while(tSim < tMax) {
-            tEndSub = dt*(Math.floor(integrator.t/dt) + 1); // Next highest integer multiple of dt after tSim.
+            // Next highest integer multiple of dt after tSim.
+            tEndSub = inputs.dt*(Math.floor(integrator.t/inputs.dt) + 1);
             while(true) {
                 moreStepsRequired = integrator.step(tEndSub);
                 tSim = integrator.t + tInit;
@@ -403,24 +404,50 @@ let plot = function(system) {
     };
 }
 
+let get_inputs = function() {
+    /* return inputs and a boolean flag indicating whether they are valid,
+       and set error message */
+
+    let errFlag = false;
+
+    let set_error = (m) => document.getElementById("error").innerHTML = m;
+    set_error('');  // Clear it
+
+    let inputs = {
+        m: Number(document.getElementById("mass").value),
+        r: Number(document.getElementById("radius").value),
+        dt: Number(document.getElementById("dt").value)*3600*24,
+    } 
+
+    Object.keys(inputs).forEach((key) => {
+        if (isNaN(inputs[key])) {
+            set_error(key + ' is invalid');
+            errFlag = true;
+            return;
+        }
+    });
+    if (errFlag) {return [inputs, errFlag];};
+
+    return [inputs, errFlag];
+
+}
+
 let tick_plot = function(system) {
-    let dt = 3600*24/2;
-    dt = parseFloat(document.getElementById("dt").value)*3600*24;
-
-    document.getElementById("error").innerHTML = dt;
-
+    let inputs, errFlag;
+    [inputs, errFlag] = get_inputs()
+    if (errFlag) {return;}
 
     // Based on current mouse click and drag status,
     // modify the bodies to include the user body.
 
-    populate_trajectories(system, 3600*24*350, dt)
+    populate_trajectories(system, 3600*24*350, inputs)
     plot(system)
     if (GO || TICKS > 0) {
-        system.tick(dt);
+        system.tick(inputs.dt);
         TICKS = Math.max(0, TICKS-1);
     }
     if (TICKS < 0) {
-        system.untick(dt);
+        system.untick(inputs.dt);
         TICKS = Math.min(0, TICKS+1);
     }
 }
