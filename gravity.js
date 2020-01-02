@@ -53,7 +53,6 @@ let Body = class{
         this.m = m; // mass (kg)
         this.a = a; // array of x, y of applied acceleration (m/s/s)
         this.r = r; // Body radius, for for collissions (m)
-        this.r_g = Math.log(r) * 5e8; // Body radius, for graphics.
         // true if the body is still being drawn. This should be set to false
         // on mouseup, indicating that the body has been finalised.
         this.draft = draft;
@@ -367,7 +366,7 @@ let populate_trajectories = function(system, inputs) {
     return 1;
 }
 
-let plot = function(system) {
+let plot = function(system, inputs) {
     /* Plot the expected trajectories of the bodies */
 
     // Clear canvas
@@ -388,8 +387,9 @@ let plot = function(system) {
     system.pBodies.forEach( (bodies, bodiesIdx) => {
         bodies.forEach(body => {
             if (bodiesIdx == 0) {  // Only draw bodies for the first set of bodies.
+                let r_g = Math.log(body.r) * inputs.bodysize;  // graphical radius.
                 ctx.beginPath();
-                ctx.arc(body.p[0][0], body.p[0][1], body.r_g, 0, Math.PI*2);
+                ctx.arc(body.p[0][0], body.p[0][1], r_g, 0, Math.PI*2);
                 ctx.fillStyle = "green";
                 ctx.fill();
                 ctx.closePath();
@@ -419,6 +419,8 @@ let get_inputs = function() {
         // The ODE solver does NOT like high precision float inputs.
         dt: Math.round(Number(document.getElementById("dt-text").value)*3600*24),
         lookahead: Math.round(Number(document.getElementById("lookahead-text").value)*3600*24),
+        
+        bodysize: Number(document.getElementById("bodysize-text").value),
     }
 
     Object.keys(inputs).forEach((key) => {
@@ -447,7 +449,7 @@ let tick_plot = function(system) {
     // modify the bodies to include the user body.
 
     populate_trajectories(system, inputs)
-    plot(system)
+    plot(system, inputs)
     if (GO || TICKS > 0) {
         system.tick(inputs.dt);
         TICKS = Math.max(0, TICKS-1);

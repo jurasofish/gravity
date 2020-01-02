@@ -170,8 +170,15 @@ let textToSlider = function(name) {
     
     </div>
     <div class="block">
-      <label>Lookahead (days)</label>
-      <input type="text" name="lookahead" id="lookahead" value="350">
+      
+      <label>bodysize (-)</label>
+      
+      <input type="text" name="bodysize" id="bodysize-text" value="5e8" 
+      data-name="bodysize" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-3" max="1e15" value="50" id="bodysize-slider" 
+      step="any" data-name="bodysize" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
     </div>
 
     <div id="error"></div>
@@ -184,6 +191,7 @@ let textToSlider = function(name) {
   document.getElementById("radius-text").oninput();
   document.getElementById("dt-text").oninput();
   document.getElementById("lookahead-text").oninput();
+  document.getElementById("bodysize-text").oninput();
 </script>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
