@@ -167,7 +167,7 @@ let defineSystem = function() {
             new Body('Earth', 5.9722e24, [0, 152.10e9], [-29.29e3, 0], [0, 0], 6.371e6),
             new Body('Venus', 4.867e24, [-108.8e9, 0], [0, -35.02e3], [0, 0], 6.0518e6),
             new Body('Ship', 4.867e4, [-108.8e9, 100e9], [0, -200.02e1], [0, 0], 100),
-            // new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
+            new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
         ]],
 
         tick: function(dt) {
@@ -185,9 +185,31 @@ let defineSystem = function() {
             console.log('untick not implemented yet');
         },
 
-        draw_limit: function() {
-            /* given the system, determine the min/max x/y to draw everything. */
-            let p = [];
+        draw_limit: function(inputs) {
+            /* given the system, determine the min/max x/y to draw everything. 
+            The input.follow string is assumed to match one of the names of the bodies,
+            in which case a draw limit for that body will be given.
+            If no body matches, the entire scene will be used.
+            */
+
+            let follow_body = null;
+
+            this.pBodies[0].forEach( body => {
+                if (body.name == inputs.follow) {
+                    follow_body = body;
+                }
+            });
+
+            if (follow_body != null) {
+                return [
+                    follow_body.p[0][0] - 100*follow_body.r, 
+                    follow_body.p[0][0] + 100*follow_body.r, 
+                    follow_body.p[0][1] - 100*follow_body.r, 
+                    follow_body.p[0][1] + 100*follow_body.r, 
+                ]
+            }
+
+            let p=[];
             this.pBodies.forEach( bodies => {
                 bodies.forEach( body => {
                     p = p.concat(body.p);
@@ -376,7 +398,7 @@ let plot = function(system, inputs) {
     // Apply transformations to make plotting possible in real cartesian coordinates.
     let minxOrig, maxxOrig, minyOrig, maxyOrig;
     let minx, maxx, miny, maxy;
-    [minxOrig, maxxOrig, minyOrig, maxyOrig] = system.draw_limit()
+    [minxOrig, maxxOrig, minyOrig, maxyOrig] = system.draw_limit(inputs)
 
     // adjust min and max values to zoom in on the centre of the area.
     let x_width = maxxOrig - minxOrig;
@@ -434,10 +456,11 @@ let get_inputs = function() {
         
         bodysize: Number(document.getElementById("bodysize-text").value),
         zoom: Number(document.getElementById("zoom-text").value),
+        follow: document.getElementById("follow-text").value,
     }
 
     Object.keys(inputs).forEach((key) => {
-        if (isNaN(inputs[key])) {
+        if (typeof inputs[key] === "number" && isNaN(inputs[key])) {
             set_error(key + ' is invalid');
             errFlag = true;
             return;
