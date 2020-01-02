@@ -149,6 +149,17 @@ let textToSlider = function(name) {
     </div>
     <div class="block">
       
+      <label>velocity (-)</label>
+      
+      <input type="text" name="velocity" id="velocity-text" value="5e6" 
+      data-name="velocity" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-3" max="1e10" value="1" id="velocity-slider" 
+      step="any" data-name="velocity" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <div class="block">
+      
       <label>&Delta;t (days)</label>
       
       <input type="text" name="dt" id="dt-text" value="5e-1" 
@@ -212,6 +223,7 @@ let textToSlider = function(name) {
   document.getElementById("lookahead-text").oninput();
   document.getElementById("bodysize-text").oninput();
   document.getElementById("zoom-text").oninput();
+  document.getElementById("velocity-text").oninput();
 </script>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->

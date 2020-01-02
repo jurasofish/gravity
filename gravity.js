@@ -314,7 +314,7 @@ let collide = function(system) {
 let createDraftBody = function(system, inputs) {
     if (MOUSECLICKED && !GO) {
         let p = MOUSEDOWN;
-        let k = 5e6;
+        let k = inputs.velocity;
         let v = [
             (MOUSEDOWN[0] - MOUSEPOS[0])/k,
             (MOUSEDOWN[1] - MOUSEPOS[1])/k,
@@ -456,6 +456,7 @@ let get_inputs = function() {
         
         bodysize: Number(document.getElementById("bodysize-text").value),
         zoom: Number(document.getElementById("zoom-text").value),
+        velocity: Number(document.getElementById("velocity-text").value),
         follow: document.getElementById("follow-text").value,
     }
 
