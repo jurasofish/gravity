@@ -377,6 +377,8 @@ let plot = function(system, inputs) {
     let minx, maxx, miny, maxy;
     [minx, maxx, miny, maxy] = system.draw_limit()
     let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
+    xScale *= inputs.zoom;
+    yScale *= inputs.zoom;
     let scale = Math.min(xScale, yScale); // Same x and y scale
     ctx.resetTransform()
     ctx.transform(1, 0, 0, -1, 0, canvas.height); // Convert to cartesian
@@ -421,6 +423,7 @@ let get_inputs = function() {
         lookahead: Math.round(Number(document.getElementById("lookahead-text").value)*3600*24),
         
         bodysize: Number(document.getElementById("bodysize-text").value),
+        zoom: Number(document.getElementById("zoom-text").value),
     }
 
     Object.keys(inputs).forEach((key) => {

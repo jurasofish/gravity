@@ -180,6 +180,17 @@ let textToSlider = function(name) {
       step="any" data-name="bodysize" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>
+    <div class="block">
+      
+      <label>zoom (-)</label>
+      
+      <input type="text" name="zoom" id="zoom-text" value="1" 
+      data-name="zoom" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-3" max="1e3" value="1" id="zoom-slider" 
+      step="any" data-name="zoom" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
 
     <div id="error"></div>
 
@@ -192,6 +203,7 @@ let textToSlider = function(name) {
   document.getElementById("dt-text").oninput();
   document.getElementById("lookahead-text").oninput();
   document.getElementById("bodysize-text").oninput();
+  document.getElementById("zoom-text").oninput();
 </script>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
