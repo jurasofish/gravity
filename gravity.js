@@ -374,11 +374,21 @@ let plot = function(system, inputs) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Apply transformations to make plotting possible in real cartesian coordinates.
+    let minxOrig, maxxOrig, minyOrig, maxyOrig;
     let minx, maxx, miny, maxy;
-    [minx, maxx, miny, maxy] = system.draw_limit()
+    [minxOrig, maxxOrig, minyOrig, maxyOrig] = system.draw_limit()
+
+    // adjust min and max values to zoom in on the centre of the area.
+    let x_width = maxxOrig - minxOrig;
+    let y_width = maxyOrig - minyOrig;
+    let midx = (minxOrig + maxxOrig)/2;
+    let midy = (minyOrig + maxyOrig)/2;
+    minx = midx - x_width/2/inputs.zoom;
+    maxx = midx + x_width/2/inputs.zoom;
+    miny = midy - y_width/2/inputs.zoom;
+    maxy = midy + y_width/2/inputs.zoom;
+
     let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
-    xScale *= inputs.zoom;
-    yScale *= inputs.zoom;
     let scale = Math.min(xScale, yScale); // Same x and y scale
     ctx.resetTransform()
     ctx.transform(1, 0, 0, -1, 0, canvas.height); // Convert to cartesian
