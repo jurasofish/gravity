@@ -414,11 +414,12 @@ let get_inputs = function() {
     set_error('');  // Clear it
 
     let inputs = {
-        m: Number(document.getElementById("mass").value),
-        r: Number(document.getElementById("radius").value),
-        dt: Number(document.getElementById("dt").value)*3600*24,
-        lookahead: Number(document.getElementById("lookahead").value)*3600*24,
-    } 
+        m: Number(document.getElementById("mass-text").value),
+        r: Number(document.getElementById("radius-text").value),
+        // The ODE solver does NOT like high precision float inputs.
+        dt: Math.round(Number(document.getElementById("dt-text").value)*3600*24),
+        lookahead: Math.round(Number(document.getElementById("lookahead-text").value)*3600*24),
+    }
 
     Object.keys(inputs).forEach((key) => {
         if (isNaN(inputs[key])) {
@@ -428,6 +429,10 @@ let get_inputs = function() {
         }
     });
     if (errFlag) {return [inputs, errFlag];};
+    
+    // example to update the slider and text box programmatically.
+    // document.getElementById("mass-text").value = (inputs.m * 1.01).toExponential(2);
+    // document.getElementById("mass-text").oninput();
 
     return [inputs, errFlag];
 

@@ -14,6 +14,7 @@
         }
       #parent {
         display: flex;
+        font-size: 75%;
       }
       #myCanvas {
         background: #eee;
@@ -29,10 +30,16 @@
       }
       input[type=text] {
           border: 1px transparent;
-          font-size: 16px;
           padding: 5px;
           width: 80px;
         background: #eee;
+      }
+      input[type=range] {
+        border: 1px transparent;
+        padding: 5px;
+        width: 180px;
+        background: #eee;
+        font-size: 75%;
       }
       .block label {
         display: inline-block;
@@ -43,22 +50,124 @@
     <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
     <!-- <script src="lib/plotly-1.51.3.min.js"></script> -->
 </head>
-<body>
+
+
+<script>
+
+  let sliderToText = function(name) {
+      /*
+
+      Update the textbox with the slider value.
+
+      Apply logarithmic scaling.
+      y = a * exp(b*x)
+
+      ty https://stackoverflow.com/a/19472811/8899565
+
+      We can say that 
+         y1 = a * exp(b*x1); y2 = a * exp(b*x2)
+      => y1/y2 = (a * exp(b*x1))/(a * exp(b*x2))
+      => y1/y2 = exp(b*x1)/exp(b*x2)
+      => y1/y2 = exp(b(x1-x2))
+      => b = ln(y1/y2)/(x1-x2)
+      and we can use the max/min for this.
+
+      a = y / exp(b*x)
+
+      This can be used forward, and it can be used backwards.
+      forwards: y = a * exp(b*x)
+      backwards: x = ln(y/a)/b
+
+      */
+
+    let slider = document.getElementById(name + "-slider");
+    let text = document.getElementById(name + "-text");
+    let valueRaw = Number(slider.value);
+    let value;
+
+    if (slider.dataset.log != 0) {
+      let min = slider.min, max=slider.max;
+      let b = Math.log(min/max)/(min-max);
+      let a = min/Math.exp(b * min);
+      value = a*Math.exp(b*valueRaw);
+    }
+    else {
+      value = valueRaw;
+    }
+
+    // use scientific notation.
+    text.value = Number(value).toExponential(2);
+  }
+
+let textToSlider = function(name) {
+  /* Update the slider with the textbox value. */
+  let slider = document.getElementById(name + "-slider");
+  let text = document.getElementById(name + "-text");
+  let valueRaw = Number(text.value);
+  let value;
+
+  if (isNaN(valueRaw)) {return;}
+
+  if (slider.dataset.log != 0) {
+    let min = slider.min, max=slider.max;
+    let b = Math.log(min/max)/(min-max);
+    let a = min/Math.exp(b * min);
+    value = Math.log(valueRaw/a)/b;
+  }
+  else {
+    value = valueRaw;
+  }
+  slider.value = value;
+}
+
+</script>
 
 <div id="parent">
   <canvas id="myCanvas" width="480" height="480"></canvas>
   <div id="controls" width="480" height="480">
     <div class="block">
+      
       <label>Mass (kg)</label>
-      <input type="text" name="mass" id="mass" value="1e5">
+      
+      <input type="text" name="mass" id="mass-text" value="1e23" 
+      data-name="mass" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-2" max="1e30" value="50" id="mass-slider" 
+      step="any" data-name="mass" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
     </div>
     <div class="block">
+      
       <label>Radius (m)</label>
-      <input type="text" name="radius" id="radius" value="100">
+      
+      <input type="text" name="radius" id="radius-text" value="5e6" 
+      data-name="radius" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1" max="1e10" value="50" id="radius-slider" 
+      step="any" data-name="radius" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
     </div>
     <div class="block">
+      
       <label>&Delta;t (days)</label>
-      <input type="text" name="dt" id="dt" value="0.5">
+      
+      <input type="text" name="dt" id="dt-text" value="5e-1" 
+      data-name="dt" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="0.01" max="1e3" value="50" id="dt-slider" 
+      step="any" data-name="dt" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <div class="block">
+      
+      <label>Lookahead (days)</label>
+      
+      <input type="text" name="lookahead" id="lookahead-text" value="350" 
+      data-name="lookahead" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="0.01" max="1e7" value="50" id="lookahead-slider" 
+      step="any" data-name="lookahead" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
     </div>
     <div class="block">
       <label>Lookahead (days)</label>
@@ -69,6 +178,13 @@
 
   </div>
 </div>
+
+<script>
+  document.getElementById("mass-text").oninput();
+  document.getElementById("radius-text").oninput();
+  document.getElementById("dt-text").oninput();
+  document.getElementById("lookahead-text").oninput();
+</script>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
 
