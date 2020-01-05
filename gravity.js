@@ -22,6 +22,8 @@ let GO = false;  // If true, tick system after every frame.
 let FINALISEBODIES = false; // True if draft bodies should be finalised in the next tick.
 let TICKS = 0;  // How many ticks to move in time while GO is false.
 
+let BODYNAMECOUNTER = 1;  // Counter for unique naming of new bodies.
+
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
     pts.forEach(point => {
@@ -327,7 +329,8 @@ let createDraftBody = function(system, inputs) {
             (MOUSEDOWN[1] - MOUSEPOS[1])/k,
         ]
         let t = system.pBodies[0][0].t[0]
-        let user = new Body('Userdd', inputs.m, p, v, [0, 0], inputs.r, t, true);
+        let user = new Body('body' + BODYNAMECOUNTER.toString(), inputs.m, p, v, [0, 0], inputs.r, t, true);
+        BODYNAMECOUNTER++;
         system.pBodies[0].push(user)
     }
 }
