@@ -536,17 +536,23 @@ let updateFollowDropdown = function(system) {
 
     // If the currently selected option was removed then update it,
     // because it was probably involved in a collision.
+    // This has to be iterative because multiple collisions can occur in the 
+    // timesteps that comprise a single dt step.
     if (removeOptions.has(selectedValue)) {
-        if (selectedValue in system.collisionMap) {
-            // If the currently selected body is involved in a collision then
-            // update it to the combined body.
-            select.value = system.collisionMap[selectedValue];
+        let newSelectedValue = selectedValue;
+        if (newSelectedValue in system.collisionMap) {
+            while (newSelectedValue in system.collisionMap) {
+                newSelectedValue = system.collisionMap[newSelectedValue];
+                if (addOptions.has(newSelectedValue)) {break;} // fucking kill me
+            }
         }
         else {
             // This will probably be reached only if time goes backwards....
-            select.value = "-1";
+            newSelectedValue = "-1";
         }
+        select.value = newSelectedValue;
     }
+
 }
 
 let tick_plot = function(system) {
