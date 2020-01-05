@@ -24,7 +24,7 @@ let TICKS = 0;  // How many ticks to move in time while GO is false.
 
 let BODYNAMECOUNTER = 1;  // Counter for unique naming of new bodies.
 
-let AUTOBODYSIZE = false;  // set to true to auto scale body size on the next frame.
+let AUTOBODYSIZE = true;  // set to true to auto scale body size on the next frame.
 
 // How much scrolling delta y has been accumulated.
 // On every frame update the page inputs with this value and set this to zero.
