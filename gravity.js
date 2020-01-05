@@ -170,6 +170,10 @@ let defineSystem = function() {
             new Body('Moon', 7.3477e22, [385e6, 152.10e9], [-29.29e3, 1.022e3], [0, 0], 1.7371e6),
         ]],
 
+        // When collisions occur, map from the original body names
+        // to the new body name.
+        collisionMap: {},
+
         tick: function(dt) {
             /* Move system dt seconds forward in time using the expected values. */
             while (true) {
@@ -302,8 +306,11 @@ let collide = function(system) {
                         bodiesNew.push(body.fork());  // debug: clone all.
                     }
                 });
-                bodiesNew.push(bodyi.combine(bodyj));
+                let newBody = bodyi.combine(bodyj);
+                bodiesNew.push(newBody);
                 system.pBodies.push(bodiesNew)
+                system.collisionMap[bodyi.name] = newBody.name;
+                system.collisionMap[bodyj.name] = newBody.name;
                 return true; // There was a collision - return true.
             }
         }
@@ -339,6 +346,7 @@ let populate_trajectories = function(system, inputs) {
         body.p = [body.p[0]];
         body.v = [body.v[0]];
     });
+    system.collisionMap = {};  // Clear old collision map
 
     // Finalise bodies, if inputs triggered it.
     if (FINALISEBODIES) {
@@ -457,7 +465,7 @@ let get_inputs = function() {
         bodysize: Number(document.getElementById("bodysize-text").value),
         zoom: Number(document.getElementById("zoom-text").value),
         velocity: Number(document.getElementById("velocity-text").value),
-        follow: document.getElementById("follow-text").value,
+        follow: document.getElementById("follow-select").value,
     }
 
     Object.keys(inputs).forEach((key) => {
@@ -475,6 +483,70 @@ let get_inputs = function() {
 
     return [inputs, errFlag];
 
+}
+
+let updateFollowDropdown = function(system) {
+    /* Populate the follow dropdown box while causing as least
+    disturbance as possible...
+    Drop down values are equal to the name of the planet, except
+    for None which has a value of -1.
+    Drop down labels are whatever.
+
+    Initially I had this do a full update on every call because I don't like
+    to ahve to keep track of state, but that causes pretty bad flickering
+    and what not in the UI. 
+    */
+
+    let select = document.getElementById("follow-select");
+    // select.length = 0; // clear all drop down options.
+
+    let selectedValue = select.options[select.selectedIndex].value;
+
+    // Put options into array for easier iterating.
+    let options = [];
+    for(let i=0; i < select.length; i++) {options.push(select.options[i])};
+
+    // The options already on the page.
+    let existingOptions = new Set(options.map(option => option.value));
+
+    // The options that we want on the page.
+    let desiredOptions = new Set(system.pBodies[0].map(body => body.name));
+    desiredOptions.add("-1"); // So that the None option is never removed.
+
+    // To add are those options which are desired but not exising.
+    let addOptions = new Set(Array.from(desiredOptions).filter(value => !existingOptions.has(value)));
+
+    // To remove are those options which exist but are not desired.
+    let removeOptions = new Set(Array.from(existingOptions).filter(value => !desiredOptions.has(value)));
+
+    // Remove the removeOptions. Should probs be done first because of indices.
+    options.forEach(option => {
+        if (removeOptions.has(option.value)) {
+            select.remove(option.index);
+        }
+    });
+    
+    // Add the addOptions.
+    Array.from(addOptions).forEach(value => {
+        let option = document.createElement('option');
+        option.label = value;
+        option.value = value;
+        select.add(option, 0);
+    })
+
+    // If the currently selected option was removed then update it,
+    // because it was probably involved in a collision.
+    if (removeOptions.has(selectedValue)) {
+        if (selectedValue in system.collisionMap) {
+            // If the currently selected body is involved in a collision then
+            // update it to the combined body.
+            select.value = system.collisionMap[selectedValue];
+        }
+        else {
+            // This will probably be reached only if time goes backwards....
+            select.value = "-1";
+        }
+    }
 }
 
 let tick_plot = function(system) {
@@ -495,6 +567,7 @@ let tick_plot = function(system) {
         system.untick(inputs.dt);
         TICKS = Math.min(0, TICKS+1);
     }
+    updateFollowDropdown(system)
 }
 
 let main = function() {

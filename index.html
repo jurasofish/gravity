@@ -41,6 +41,12 @@
         background: #eee;
         font-size: 75%;
       }
+      .block select {
+        padding: 5px;
+        width: 90px;
+        background: #eee;
+        font-size: 75%;
+      }
       .block label {
         display: inline-block;
         width: 100px;
@@ -204,10 +210,11 @@ let textToSlider = function(name) {
     </div>
     <div class="block">
       
-      <label>follow</label>
+      <label>Follow</label>
       
-      <input type="text" name="follow" id="follow-text" value="Earth" 
-      data-name="follow">
+      <select id="follow-select" name="follow-select">
+        <option label="None" value=-1>none</option>
+      </select>
     
     </div>
 
