@@ -204,7 +204,7 @@ let textToSlider = function(name) {
       <input type="text" name="zoom" id="zoom-text" value="1" 
       data-name="zoom" oninput="textToSlider(this.dataset.name)">
       
-      <input type="range" min="1e-3" max="1e3" value="1" id="zoom-slider" 
+      <input type="range" min="1e-10" max="1e10" value="1" id="zoom-slider" 
       step="any" data-name="zoom" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>

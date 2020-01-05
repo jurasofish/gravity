@@ -26,6 +26,11 @@ let BODYNAMECOUNTER = 1;  // Counter for unique naming of new bodies.
 
 let AUTOBODYSIZE = false;  // set to true to auto scale body size on the next frame.
 
+// How much scrolling delta y has been accumulated.
+// On every frame update the page inputs with this value and set this to zero.
+// This is an alternative to uptading page inputs on EVERY scroll event.
+let ACCUMULATEDDELTAY = 0;
+
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
     pts.forEach(point => {
@@ -490,6 +495,16 @@ let get_inputs = function() {
     let set_error = (m) => document.getElementById("error").innerHTML = m;
     set_error('');  // Clear it
 
+    // update the zoom value with ACCUMULATEDDELTAY and then reset ACCUMULATEDDELTAY.
+    if (ACCUMULATEDDELTAY != 0) {
+        let curZoom = Number(document.getElementById("zoom-text").value)
+        let newZoom = curZoom * (1 + ACCUMULATEDDELTAY / -500);
+        document.getElementById("zoom-text").value = newZoom;
+        document.getElementById("zoom-text").oninput();
+        document.getElementById("zoom-slider").oninput();
+        ACCUMULATEDDELTAY = 0;
+    }
+
     let inputs = {
         m: Number(document.getElementById("mass-text").value),
         r: Number(document.getElementById("radius-text").value),
@@ -682,6 +697,12 @@ document.addEventListener("keydown", event => {
         default:
             break;
     }
+});
+
+canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    ACCUMULATEDDELTAY += e.deltaY;
+    console.log(e);
 });
 
 main()
