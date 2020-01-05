@@ -24,6 +24,8 @@ let TICKS = 0;  // How many ticks to move in time while GO is false.
 
 let BODYNAMECOUNTER = 1;  // Counter for unique naming of new bodies.
 
+let AUTOBODYSIZE = false;  // set to true to auto scale body size on the next frame.
+
 let drawLine = function(ctx, pts) {
     ctx.beginPath();
     pts.forEach(point => {
@@ -412,6 +414,13 @@ let plot = function(system, inputs) {
     [minxOrig, maxxOrig, minyOrig, maxyOrig] = system.draw_limit(inputs)
 
     // adjust min and max values to zoom in on the centre of the area.
+    if (AUTOBODYSIZE) {
+        // Reset zoom if auto sizing bodies.
+        inputs.zoom = 1;
+        document.getElementById("zoom-text").value = 1;
+        document.getElementById("zoom-text").oninput();
+        document.getElementById("zoom-slider").oninput();
+    }
     let x_width = maxxOrig - minxOrig;
     let y_width = maxyOrig - minyOrig;
     let midx = (minxOrig + maxxOrig)/2;
@@ -428,6 +437,29 @@ let plot = function(system, inputs) {
     ctx.transform(scale, 0, 0, scale, 0, 0); // scale
     ctx.transform(1, 0, 0, 1, -minx, -miny);  // Shift origin
     ctx.lineWidth = 1/scale;  // Adjust so it's not super thin.
+
+    if (AUTOBODYSIZE) {
+         /* Auto scale the body size.
+            for some factor k,
+            ln(r) * inputs.bodysize = width/k;
+         => inputs.bodysize = width/k/ln(r)
+         */
+        let all_radii =  [];
+        system.pBodies[0].forEach(body => {
+            if (inputs.follow == "-1" || body.name == inputs.follow) {
+                all_radii.push(body.r)
+            }
+        });
+        let mean_radii = all_radii.reduce((a,b) => {return a+b;})/all_radii.length;
+        let bodysize = (maxx - minx)/30/Math.log(mean_radii);
+
+        inputs.bodysize = bodysize;
+        document.getElementById("bodysize-text").value = bodysize;
+        document.getElementById("bodysize-text").oninput();
+        document.getElementById("bodysize-slider").oninput();
+
+        AUTOBODYSIZE = false;
+    }
 
     system.pBodies.forEach( (bodies, bodiesIdx) => {
         bodies.forEach(body => {
@@ -554,6 +586,7 @@ let updateFollowDropdown = function(system) {
             newSelectedValue = "-1";
         }
         select.value = newSelectedValue;
+        AUTOBODYSIZE = true;
     }
 
 }
@@ -625,6 +658,10 @@ canvas.addEventListener('mousemove', e => {
     }
     [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEPOS = [x, y];
+});
+
+document.getElementById("follow-select").addEventListener('change', e => {
+    AUTOBODYSIZE = true;
 });
 
 document.addEventListener("keydown", event => {
