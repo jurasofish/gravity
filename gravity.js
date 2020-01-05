@@ -581,6 +581,7 @@ let updateFollowDropdown = function(system) {
         let option = document.createElement('option');
         option.label = value;
         option.value = value;
+        option.innerHTML = value;
         select.add(option, 0);
     })
 
