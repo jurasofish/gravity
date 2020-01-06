@@ -687,7 +687,6 @@ document.getElementById("follow-select").addEventListener('change', e => {
 });
 
 document.addEventListener("keydown", event => {
-    console.log(event.keyCode);
     if(event.target.tagName.toLowerCase() != 'body') {
         return;
     };
@@ -709,7 +708,6 @@ document.addEventListener("keydown", event => {
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     ACCUMULATEDDELTAY += e.deltaY;
-    console.log(e);
 });
 
 main()
