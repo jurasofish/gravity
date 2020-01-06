@@ -526,6 +526,12 @@ let get_inputs = function() {
         }
     });
     if (errFlag) {return [inputs, errFlag];};
+
+    if (inputs.lookahead < inputs.dt) {
+        set_error('lookahead must be greater than dt');
+        errFlag = true;
+    }
+    if (errFlag) {return [inputs, errFlag];};
     
     // example to update the slider and text box programmatically.
     // document.getElementById("mass-text").value = (inputs.m * 1.01).toExponential(2);
