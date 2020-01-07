@@ -476,7 +476,7 @@ let plot = function(system, inputs) {
                 let r_g = Math.log(body.r) * inputs.bodysize;  // graphical radius.
                 ctx.beginPath();
                 ctx.arc(body.p[0][0], body.p[0][1], r_g, 0, Math.PI*2);
-                ctx.fillStyle = "green";
+                ctx.fillStyle = "#22822a";
                 ctx.fill();
                 ctx.closePath();
             }
