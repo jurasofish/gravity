@@ -4,6 +4,7 @@ const G = 6.67408e-11; // gravitational constant
 let TOL = 1e-8;  // Tolerance for ODE solver. Overriden by user input later.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
+let ZOOMPAD = 0.985;
 
 let windowSize = () => [window.innerHeight, window.innerWidth-200];
 [canvas.height, canvas.width] = windowSize();
@@ -432,10 +433,11 @@ let plot = function(system, inputs) {
     let y_width = maxyOrig - minyOrig;
     let midx = (minxOrig + maxxOrig)/2;
     let midy = (minyOrig + maxyOrig)/2;
-    minx = midx - x_width/2/inputs.zoom;
-    maxx = midx + x_width/2/inputs.zoom;
-    miny = midy - y_width/2/inputs.zoom;
-    maxy = midy + y_width/2/inputs.zoom;
+    let zoom = inputs.zoom * ZOOMPAD;
+    minx = midx - x_width/2/zoom;
+    maxx = midx + x_width/2/zoom;
+    miny = midy - y_width/2/zoom;
+    maxy = midy + y_width/2/zoom;
 
     let xScale = canvas.width/(maxx-minx), yScale = canvas.height/(maxy-miny);
     let scale = Math.min(xScale, yScale); // Same x and y scale
