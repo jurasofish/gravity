@@ -18,6 +18,7 @@ let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 let MOUSECLICKMATRIX = null;  // transformtion matrix from when mouse was clicked.
 
 let GO = true;  // If true, tick system after every frame.
+let WASGO = false; // Used to maintain state of GO after pausing to place new body.
 // GO = true;  // debug
 let FINALISEBODIES = false; // True if draft bodies should be finalised in the next tick.
 let TICKS = 0;  // How many ticks to move in time while GO is false.
@@ -656,6 +657,7 @@ canvas.addEventListener('mousedown', e => {
     let x = e.clientX - canvas.offsetLeft;
     let y = e.clientY - canvas.offsetTop;
     MOUSECLICKMATRIX = getTransMatrix();
+    WASGO = GO;  // backup state of GO to restore on mouseup.
     GO = false;
     [x, y] = transformCoords([x, y], MOUSECLICKMATRIX);
     MOUSEDOWN = [x, y];
@@ -667,6 +669,7 @@ canvas.addEventListener('mouseup', e => {
     if (MOUSECLICKED) {
         // GO = true;
     }
+    GO = WASGO;
     MOUSECLICKED = false;
     FINALISEBODIES = true;
 });
