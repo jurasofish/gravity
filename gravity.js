@@ -17,7 +17,7 @@ let MOUSEDOWN = [0, 0];  // Position where mouse was clicked.
 let MOUSEPOS = [0, 0];  // Position of mouse hovering.
 let MOUSECLICKMATRIX = null;  // transformtion matrix from when mouse was clicked.
 
-let GO = false;  // If true, tick system after every frame.
+let GO = true;  // If true, tick system after every frame.
 // GO = true;  // debug
 let FINALISEBODIES = false; // True if draft bodies should be finalised in the next tick.
 let TICKS = 0;  // How many ticks to move in time while GO is false.
