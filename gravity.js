@@ -305,8 +305,6 @@ let collide = function(system) {
             j_r = bodyj.r;
             body_sep = ((i_x - j_x)**2  + (i_y - j_y)**2)**0.5;
             if (body_sep <= j_r + i_r) {
-                // console.log(bodyi.name, bodyj.name);
-
                 // Create new bodies in system, and merge collided objects.
                 let bodiesNew = [];  // To be appended to system.pBodies
 
@@ -346,7 +344,7 @@ let createDraftBody = function(system, inputs) {
 
 let populate_trajectories = function(system, inputs) {
     /* mutate all bodies to update their expected trajectories 
-    inputs.lookahead is how many more seconds into the future to simulate.
+    inputs.
     Data will be stored in increments of at most inputs.dt.
     */
 
@@ -624,9 +622,6 @@ let tick_plot = function(system) {
     if (errFlag) {return;}
     TOL = inputs.tolerance;
 
-    // Based on current mouse click and drag status,
-    // modify the bodies to include the user body.
-
     populate_trajectories(system, inputs)
     plot(system, inputs)
     if (GO || TICKS > 0) {
@@ -668,9 +663,6 @@ canvas.addEventListener('mousedown', e => {
 });
 
 canvas.addEventListener('mouseup', e => {
-    if (MOUSECLICKED) {
-        // GO = true;
-    }
     GO = WASGO;
     MOUSECLICKED = false;
     FINALISEBODIES = true;
