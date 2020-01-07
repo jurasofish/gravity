@@ -52,6 +52,11 @@
         width: 100px;
         text-align: right;
       }
+      p.heading {
+        font-weight: bolder;
+        font-size: 125%;
+        text-align: center;
+      }
     </style>
     <!-- <script src="https://cdn.plot.ly/plotly-latest.min.js"></script> -->
     <!-- <script src="lib/plotly-1.51.3.min.js"></script> -->
@@ -132,6 +137,61 @@ let textToSlider = function(name) {
   <canvas id="myCanvas" width="480" height="480"></canvas>
   <div id="controls" width="480" height="480">
     <div class="block">
+      <label>Lookahead (days)</label>
+      
+      <input type="text" name="lookahead" id="lookahead-text" value="350" 
+      data-name="lookahead" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="0.01" max="1e7" value="50" id="lookahead-slider" 
+      step="any" data-name="lookahead" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <div class="block">
+      
+      <label>&Delta;t (days)</label>
+      
+      <input type="text" name="dt" id="dt-text" value="5e-1" 
+      data-name="dt" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="0.01" max="1e3" value="50" id="dt-slider" 
+      step="any" data-name="dt" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <div class="block">
+      
+      <label>bodysize (-)</label>
+      
+      <input type="text" name="bodysize" id="bodysize-text" value="5e8" 
+      data-name="bodysize" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-3" max="1e15" value="50" id="bodysize-slider" 
+      step="any" data-name="bodysize" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <div class="block">
+      
+      <label>zoom (-)</label>
+      
+      <input type="text" name="zoom" id="zoom-text" value="1" 
+      data-name="zoom" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-10" max="1e10" value="1" id="zoom-slider" 
+      step="any" data-name="zoom" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
+    <br><br>
+    <div class="block">
+      
+      <label>Follow</label>
+      
+      <select id="follow-select" name="follow-select">
+        <option label="None" value=-1>None</option>
+      </select>
+    
+    </div>
+    <br><br><br><br>
+    <p class="heading">- FOR NEW BODIES -</p>
+    <div class="block">
       
       <label>Mass (kg)</label>
       
@@ -162,59 +222,6 @@ let textToSlider = function(name) {
       
       <input type="range" min="1e-3" max="1e10" value="1" id="velocity-slider" 
       step="any" data-name="velocity" data-log=1 oninput="sliderToText(this.dataset.name)">
-    
-    </div>
-    <div class="block">
-      
-      <label>&Delta;t (days)</label>
-      
-      <input type="text" name="dt" id="dt-text" value="5e-1" 
-      data-name="dt" oninput="textToSlider(this.dataset.name)">
-      
-      <input type="range" min="0.01" max="1e3" value="50" id="dt-slider" 
-      step="any" data-name="dt" data-log=1 oninput="sliderToText(this.dataset.name)">
-    
-    </div>
-    <div class="block">
-      
-      <label>Lookahead (days)</label>
-      
-      <input type="text" name="lookahead" id="lookahead-text" value="350" 
-      data-name="lookahead" oninput="textToSlider(this.dataset.name)">
-      
-      <input type="range" min="0.01" max="1e7" value="50" id="lookahead-slider" 
-      step="any" data-name="lookahead" data-log=1 oninput="sliderToText(this.dataset.name)">
-    
-    </div>
-    <div class="block">
-      
-      <label>bodysize (-)</label>
-      
-      <input type="text" name="bodysize" id="bodysize-text" value="5e8" 
-      data-name="bodysize" oninput="textToSlider(this.dataset.name)">
-      
-      <input type="range" min="1e-3" max="1e15" value="50" id="bodysize-slider" 
-      step="any" data-name="bodysize" data-log=1 oninput="sliderToText(this.dataset.name)">
-    
-    </div>
-    <div class="block">
-      
-      <label>zoom (-)</label>
-      
-      <input type="text" name="zoom" id="zoom-text" value="1" 
-      data-name="zoom" oninput="textToSlider(this.dataset.name)">
-      
-      <input type="range" min="1e-10" max="1e10" value="1" id="zoom-slider" 
-      step="any" data-name="zoom" data-log=1 oninput="sliderToText(this.dataset.name)">
-    
-    </div>
-    <div class="block">
-      
-      <label>Follow</label>
-      
-      <select id="follow-select" name="follow-select">
-        <option label="None" value=-1>None</option>
-      </select>
     
     </div>
 
