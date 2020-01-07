@@ -230,10 +230,10 @@ let textToSlider = function(name) {
       
       <label>Velocity Factor (-)</label>
       
-      <input type="text" name="velocity" id="velocity-text" value="5e6" 
+      <input type="text" name="velocity" id="velocity-text" value="2e-7" 
       data-name="velocity" oninput="textToSlider(this.dataset.name)">
       
-      <input type="range" min="1e-3" max="1e10" value="1" id="velocity-slider" 
+      <input type="range" min="1e-20" max="1" value="2e-7" id="velocity-slider" 
       step="any" data-name="velocity" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>

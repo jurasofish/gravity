@@ -333,8 +333,8 @@ let createDraftBody = function(system, inputs) {
         let p = MOUSEDOWN;
         let k = inputs.velocity;
         let v = [
-            (MOUSEDOWN[0] - MOUSEPOS[0])/k,
-            (MOUSEDOWN[1] - MOUSEPOS[1])/k,
+            (MOUSEDOWN[0] - MOUSEPOS[0])*k,
+            (MOUSEDOWN[1] - MOUSEPOS[1])*k,
         ]
         let t = system.pBodies[0][0].t[0]
         let user = new Body('body' + BODYNAMECOUNTER.toString(), inputs.m, p, v, [0, 0], inputs.r, t, true);
