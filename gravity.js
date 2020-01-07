@@ -389,6 +389,7 @@ let populate_trajectories = function(system, inputs) {
         while(tSim < tMax) {
             // Next highest integer multiple of dt after tSim.
             tEndSub = inputs.dt*(Math.floor(integrator.t/inputs.dt) + 1);
+            tEndSub = Math.min(tMax, tEndSub); // Don't simulate past tMax
             while(true) {
                 moreStepsRequired = integrator.step(tEndSub);
                 tSim = integrator.t + tInit;
