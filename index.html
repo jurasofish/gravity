@@ -31,7 +31,7 @@
       input[type=text] {
           border: 1px transparent;
           padding: 5px;
-          width: 80px;
+          width: 70px;
         background: #eee;
       }
       input[type=range] {
@@ -49,8 +49,9 @@
       }
       .block label {
         display: inline-block;
-        width: 100px;
+        width: 110px;
         text-align: right;
+        color: #3b3b3b;
       }
       p.heading {
         font-weight: bolder;
@@ -136,6 +137,7 @@ let textToSlider = function(name) {
 <div id="parent">
   <canvas id="myCanvas" width="480" height="480"></canvas>
   <div id="controls" width="480" height="480">
+    <br>
     <div class="block">
       <label>Lookahead (days)</label>
       
@@ -189,7 +191,7 @@ let textToSlider = function(name) {
       </select>
     
     </div>
-    <br><br><br><br>
+    <br>
     <p class="heading">- FOR NEW BODIES -</p>
     <div class="block">
       
@@ -224,6 +226,13 @@ let textToSlider = function(name) {
       step="any" data-name="velocity" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>
+    <br>
+    <p class="heading">- CONTROLS -</p>
+    <label>[click and drag] - Place new body</label><br>
+    <label>[space] - Run/pause</label><br>
+    <label>[right] - Step forward one &Delta;t</label><br>
+    <label>[scroll] - zoom in and out</label><br>
+    <label>[c] or [drag off screen] - Cancel body being placed</label><br>
 
     <div id="error"></div>
 
