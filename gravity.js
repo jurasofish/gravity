@@ -145,9 +145,14 @@ let Body = class{
         if (this.t.length == 0) {return true;}
         let finalTime = this.t[0] + dt;
         while (this.t[0] < finalTime) {
-            this.t_hist.push(this.t.shift())
-            this.p_hist.push(this.p.shift())
-            this.v_hist.push(this.v.shift())
+            // Push these into t_hist and so on if you want to go backwards
+            // in time in the future. Not implemented yet.
+            this.t.shift();
+            this.p.shift();
+            this.v.shift();
+            // this.t_hist.push(this.t.shift())
+            // this.p_hist.push(this.p.shift())
+            // this.v_hist.push(this.v.shift())
             if (this.t.length == 0) {return true;}
         }
         return false;
