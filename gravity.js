@@ -1,7 +1,7 @@
 "use strict";
 
 const G = 6.67408e-11; // gravitational constant
-const TOL = 1e-8;  // Tolerance for ODE solver.
+let TOL = 1e-8;  // Tolerance for ODE solver. Overriden by user input later.
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 
@@ -517,6 +517,7 @@ let get_inputs = function() {
         zoom: Number(document.getElementById("zoom-text").value),
         velocity: Number(document.getElementById("velocity-text").value),
         follow: document.getElementById("follow-select").value,
+        tolerance: document.getElementById("tolerance-text").value,
     }
 
     Object.keys(inputs).forEach((key) => {
@@ -618,6 +619,7 @@ let tick_plot = function(system) {
     let inputs, errFlag;
     [inputs, errFlag] = get_inputs()
     if (errFlag) {return;}
+    TOL = inputs.tolerance;
 
     // Based on current mouse click and drag status,
     // modify the bodies to include the user body.

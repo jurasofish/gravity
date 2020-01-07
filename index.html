@@ -181,6 +181,17 @@ let textToSlider = function(name) {
       step="any" data-name="zoom" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>
+    <div class="block">
+      
+      <label>Tolerance (-)</label>
+      
+      <input type="text" name="tolerance" id="tolerance-text" value="1e-8" 
+      data-name="tolerance" oninput="textToSlider(this.dataset.name)">
+      
+      <input type="range" min="1e-16" max="1" value="1e-8" id="tolerance-slider" 
+      step="any" data-name="tolerance" data-log=1 oninput="sliderToText(this.dataset.name)">
+    
+    </div>
     <br><br>
     <div class="block">
       
@@ -247,6 +258,7 @@ let textToSlider = function(name) {
   document.getElementById("bodysize-text").oninput();
   document.getElementById("zoom-text").oninput();
   document.getElementById("velocity-text").oninput();
+  document.getElementById("tolerance-text").oninput();
 </script>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/ode45-cash-karp/lib/index.js"></script> -->
