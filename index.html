@@ -144,7 +144,7 @@ let textToSlider = function(name) {
       <input type="text" name="lookahead" id="lookahead-text" value="350" 
       data-name="lookahead" oninput="textToSlider(this.dataset.name)">
       
-      <input type="range" min="0.01" max="1e7" value="50" id="lookahead-slider" 
+      <input type="range" min="0.1" max="10000" value="50" id="lookahead-slider" 
       step="any" data-name="lookahead" data-log=1 oninput="sliderToText(this.dataset.name)">
     
     </div>
